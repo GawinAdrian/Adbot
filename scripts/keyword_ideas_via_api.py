@@ -6,19 +6,22 @@ read-only Google Ads MCP server, so this script calls the Google Ads API
 directly through the official ``google-ads`` Python client.  The dependency is
 loaded ephemerally and stays out of the repository lock files:
 
-  uv run --no-project --with google-ads==31.4.0 scripts/keyword_ideas_via_api.py \\
+  uv run --no-project --with google-ads==35.0.0 scripts/keyword_ideas_via_api.py \\
       --customer 1234567890 --login-customer-id 1122334455 \\
       --keywords "beispiel dienstleistung" "beispiel dienstleistung anbieter" \\
       --geo-target-constants 2276 --language 1001 \\
       --query-id beispiel-cluster-v1 --out path/to/keyword-ideas.json
 
-(google-ads==31.4.0 was the current release on PyPI when this script was
-written, 2026-09-01; bump deliberately, not implicitly.)
+(google-ads==35.0.0 was the current release on PyPI on 2026-10-29; bump deliberately,
+not implicitly.  Since 32.0.0 the client accepts a configuration without a developer
+token, which Google sunset on 2026-09-09.)
 
-Credentials load exactly like scripts/google_ads_mcp.sh: GOOGLE_PROJECT_ID,
-GOOGLE_ADS_DEVELOPER_TOKEN (or DEVELOPER_TOKEN), GOOGLE_APPLICATION_CREDENTIALS
-and optionally GOOGLE_ADS_LOGIN_CUSTOMER_ID come from the environment first and
-the git-ignored .env second.  Secret values are never printed.
+Credentials load like scripts/google_ads_mcp.sh (see adbot_env.py): GOOGLE_PROJECT_ID and
+Application Default Credentials are required; GOOGLE_ADS_LOGIN_CUSTOMER_ID is optional
+(manager accounts only); a developer token is optional and legacy.  Values come from the
+environment first, then $ADBOT_PROFILE_DIR/env, then the git-ignored .env.  Secret values
+are never printed.  Planning services need Basic access on the Google Cloud project;
+Explorer access is rejected by Google for this service.
 
 The stored envelope is validated and normalized by
 ``claude_ads_core.adapters.GoogleKeywordIdeasAdapter``; metrics the API does
@@ -35,32 +38,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import adbot_env  # noqa: E402  (sibling module, path set above)
+
 ROOT = Path(__file__).resolve().parents[1]
-_ENV_KEYS = (
-    "GOOGLE_PROJECT_ID",
-    "GOOGLE_ADS_DEVELOPER_TOKEN",
-    "DEVELOPER_TOKEN",
-    "GOOGLE_ADS_LOGIN_CUSTOMER_ID",
-    "GOOGLE_APPLICATION_CREDENTIALS",
-)
 _API_VERSION = re.compile(r"^v[0-9]{1,3}$")
 MAX_SEED_KEYWORDS = 10  # conservative service cap; verify against the live API during the pilot
-
-
-def _load_env_file() -> None:
-    """Port of scripts/google_ads_mcp.sh: fill missing keys from the git-ignored .env."""
-    env_path = ROOT / ".env"
-    if not env_path.is_file():
-        return
-    values: dict[str, str] = {}
-    for line in env_path.read_text(encoding="utf-8").splitlines():
-        for key in _ENV_KEYS:
-            if line.startswith(f"{key}="):
-                value = line.split("=", 1)[1].strip().strip("'\"")
-                if value:
-                    values[key] = value
-    for key, value in values.items():
-        os.environ.setdefault(key, value)
 
 
 def _digits(value: str, label: str) -> str:
@@ -132,19 +115,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.limit < 1:
         raise SystemExit("--limit must be >= 1")
 
-    _load_env_file()
-    developer_token = os.environ.get("GOOGLE_ADS_DEVELOPER_TOKEN") or os.environ.get("DEVELOPER_TOKEN")
-    if not developer_token:
-        raise SystemExit("GOOGLE_ADS_DEVELOPER_TOKEN is not set (add it to .env)")
-    os.environ.setdefault("GOOGLE_CLOUD_PROJECT", os.environ.get("GOOGLE_PROJECT_ID", ""))
-    adc_path = Path(
-        os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-        or Path.home() / ".config" / "gcloud" / "application_default_credentials.json"
-    )
-    if not adc_path.is_file():
-        raise SystemExit(
-            f"credentials file missing: {adc_path} (run gcloud auth application-default login)"
-        )
+    adbot_env.load_env(ROOT, os.environ)
+    try:
+        project = adbot_env.require_project(os.environ)
+        adc_path = adbot_env.adc_path(os.environ)
+    except adbot_env.CredentialsError as exc:
+        raise SystemExit(str(exc))
+    os.environ.setdefault("GOOGLE_CLOUD_PROJECT", project)
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(adc_path)
 
     try:
@@ -156,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
     except ImportError as exc:
         raise SystemExit(
             "the google-ads client library is not installed; run this script via "
-            "'uv run --no-project --with google-ads==31.4.0 scripts/keyword_ideas_via_api.py ...' "
+            "'uv run --no-project --with google-ads==35.0.0 scripts/keyword_ideas_via_api.py ...' "
             f"(import error: {exc})"
         )
 
@@ -168,13 +145,7 @@ def main(argv: list[str] | None = None) -> int:
 
     customer_id = _digits(args.customer, "--customer")
     login_customer_id = _digits(args.login_customer_id, "--login-customer-id") if args.login_customer_id else None
-    config: dict[str, object] = {
-        "developer_token": developer_token,
-        "use_proto_plus": True,
-        "use_application_default_credentials": True,
-    }
-    if login_customer_id:
-        config["login_customer_id"] = login_customer_id
+    config = adbot_env.build_client_config(os.environ, login_customer_id)
     client = GoogleAdsClient.load_from_dict(config)
 
     service = client.get_service("KeywordPlanIdeaService", version=api_version)

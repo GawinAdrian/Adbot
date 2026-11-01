@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-07-11",
+  "generated_at": "2026-11-01",
   "claims": [
     {
       "id": "CLM-0001",
@@ -532,7 +532,7 @@
     },
     {
       "id": "CLM-0210",
-      "statement": "The first-party Google Ads MCP server runs locally via pipx, is read-only, exposes the tools search, get_resource_metadata, and list_accessible_customers, and reads GOOGLE_PROJECT_ID, GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_APPLICATION_CREDENTIALS, and optionally GOOGLE_ADS_LOGIN_CUSTOMER_ID from the environment.",
+      "statement": "The first-party Google Ads MCP server runs locally via pipx, is read-only, exposes the tools search, get_resource_metadata, and list_accessible_customers, and reads GOOGLE_PROJECT_ID, GOOGLE_APPLICATION_CREDENTIALS, and optionally GOOGLE_ADS_LOGIN_CUSTOMER_ID from the environment; a developer token is no longer required (see CLM-0219).",
       "scope": "Repository README and local start of the server at retrieval date; no authenticated account access implied",
       "classification": "evidence-based",
       "verdict": "verified",
@@ -576,6 +576,147 @@
       "load_bearing": true,
       "last_verified": "2026-09-01",
       "refresh_due": "2026-10-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0214",
+      "statement": "Google Ads API developer tokens were sunset on 2026-09-09; API access levels are now determined by the Google Cloud project that issued the OAuth credentials.",
+      "scope": "Official developer-token page at retrieval date.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-developer-token-policy-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0215",
+      "statement": "A developer-token request header may still be sent but is optional and ignored by the API servers; Google recommends removing it because future major API versions will start rejecting developer tokens.",
+      "scope": "Official developer-token page at retrieval date. A real read through the MCP server and through gaql_via_api.py succeeded on 2026-11-01 without any token.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-developer-token-policy-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers",
+      "contradiction": "The Google Ads OAuth overview page still says a developer token is required in addition to OAuth credentials (source google-ads-oauth-overview-official).",
+      "notes": "Practical result 2026-11-01: both the MCP server and the direct API script read a real account without a token."
+    },
+    {
+      "id": "CLM-0216",
+      "statement": "Google Ads API access levels are Test, Explorer (test and production accounts, 2,880 operations per day on production), Basic (15,000 per day, brand verification is a prerequisite) and Standard (unlimited, manual audit).",
+      "scope": "Official access-levels page at retrieval date.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-access-levels-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0217",
+      "statement": "Explorer access cannot use the planning services (KeywordPlan services, AudienceInsightsService, ReachPlanService), account creation, user management, or billing services.",
+      "scope": "Official access-levels page at retrieval date. Keyword ideas through the API therefore need Basic access on the Cloud project.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-access-levels-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0218",
+      "statement": "Permissible use and the Required Minimum Functionality apply to Cloud projects with Standard access; granting clients access to a tool requires an update application and demo sign-in.",
+      "scope": "Official access-levels page at retrieval date. Adbot avoids this by giving every user their own Cloud project.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-access-levels-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0219",
+      "statement": "The Google Ads MCP server is read-only (tools list_accessible_customers, search, get_resource_metadata), runs locally via pipx, needs GOOGLE_PROJECT_ID and Application Default Credentials, takes GOOGLE_ADS_LOGIN_CUSTOMER_ID optionally, and no longer requires GOOGLE_ADS_DEVELOPER_TOKEN.",
+      "scope": "Official MCP integration guide at retrieval date; a token-free start and a list_accessible_customers call succeeded against a real account on 2026-11-01.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-mcp-server-guide-official",
+        "google-ads-mcp-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0220",
+      "statement": "A Google Cloud project whose OAuth consent screen is in status Testing is issued refresh tokens that expire after 7 days; admin session policies can force re-authentication after 1 to 24 hours and calls then fail with invalid_grant.",
+      "scope": "Official OAuth 2.0 page at retrieval date; does not apply to apps requesting only basic profile scopes.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-oauth2-protocols-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0221",
+      "statement": "Users can review and revoke access granted to third-party apps on their Google Account permissions page.",
+      "scope": "Official Google Ads OAuth overview at retrieval date.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-oauth-overview-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0222",
+      "statement": "Google Ads API language constants: German is code de with ID 1001 and Polish is code pl with ID 1030; geo target constants: Germany is ID 2276 (country code DE) and Poland is ID 2616 (country code PL), both target type Country.",
+      "scope": "Read-only GAQL queries on language_constant and geo_target_constant through gaql_via_api.py against API v26 on 2026-11-01; resource documentation linked in the sources. The codes-and-formats page body could not be read directly.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": ["google-ads-language-geo-constants-official", "google-ads-codes-formats-official"],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0223",
+      "statement": "The google-ads Python client accepts a client configuration without developer_token from version 32.0.0 (released 2026-09-09); version 31.4.0 rejects it.",
+      "scope": "Local offline check on 2026-11-01 with versions 31.4.0, 32.0.0 and 35.0.0; a live token-free read with 35.0.0 (default API v26) also succeeded.",
+      "classification": "practitioner",
+      "verdict": "verified",
+      "source_ids": [
+        "pypi-google-ads-client"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
       "owner": "adbot-maintainers"
     }
   ]

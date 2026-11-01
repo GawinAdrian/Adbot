@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "platform": "google",
+  "customer_id": "1234567890",
+  "login_customer_id": null,
+  "api_version": "v26",
+  "query_id": "campaign-daily-v1",
+  "query": "SELECT segments.date, customer.id, customer.descriptive_name, customer.currency_code, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign_budget.amount_micros, metrics.cost_micros, metrics.conversions FROM campaign WHERE segments.date BETWEEN '2026-10-01' AND '2026-10-02'",
+  "retrieved_at": "2026-11-01T08:00:00Z",
+  "rows": [
+    {
+      "segments.date": "2026-10-01",
+      "customer.id": "1234567890",
+      "customer.descriptive_name": "Sanitized Direct API Demo",
+      "customer.currency_code": "EUR",
+      "campaign.id": "222000111",
+      "campaign.name": "Sanitized Search Campaign",
+      "campaign.status": "ENABLED",
+      "campaign.advertising_channel_type": "SEARCH",
+      "campaign_budget.amount_micros": "15000000",
+      "metrics.cost_micros": "12400000",
+      "metrics.conversions": 1.0
+    },
+    {
+      "segments.date": "2026-10-02",
+      "customer.id": "1234567890",
+      "customer.descriptive_name": "Sanitized Direct API Demo",
+      "customer.currency_code": "EUR",
+      "campaign.id": "222000111",
+      "campaign.name": "Sanitized Search Campaign",
+      "campaign.status": "ENABLED",
+      "campaign.advertising_channel_type": "SEARCH",
+      "campaign_budget.amount_micros": "15000000",
+      "metrics.cost_micros": "14850000",
+      "metrics.conversions": 0.0
+    }
+  ]
+}
