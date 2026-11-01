@@ -995,6 +995,37 @@
       "redistribution": "metadata-only",
       "claim_ids": ["CLM-0222"],
       "notes": "Values confirmed by read-only GAQL queries against the live API (v26) on 2026-11-01."
+    },
+    {
+      "id": "google-ads-cloud-project-user-auth-official",
+      "title": "Google Ads API: Set up a Google API Console project (user authentication)",
+      "locator": "https://developers.google.com/google-ads/api/docs/oauth/cloud-project?authpath=user_authentication",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0224"
+      ],
+      "notes": "Page last updated 2026-10-30 UTC."
+    },
+    {
+      "id": "gcloud-adc-revoke-official",
+      "title": "gcloud auth application-default revoke",
+      "locator": "https://docs.cloud.google.com/sdk/gcloud/reference/auth/application-default/revoke",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Cloud documentation CC BY 4.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0225"
+      ]
     }
   ]
 }
