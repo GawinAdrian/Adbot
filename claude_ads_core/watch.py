@@ -74,6 +74,7 @@ class WatchResult:
     currency: str
     missing_inputs: tuple[str, ...]
     query_id: str
+    summary: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -84,6 +85,7 @@ class WatchResult:
             "window": {"start": self.window_start, "end": self.window_end},
             "currency": self.currency,
             "query_id": self.query_id,
+            "summary": dict(self.summary),
             "missing_inputs": list(self.missing_inputs),
             "checks": [
                 {"rule": c.rule, "state": c.state, "status": c.status, "campaign_id": c.campaign_id,
@@ -119,6 +121,20 @@ def _day_sum(rows: Sequence[Mapping[str, str]], key: str, start: date, end: date
         if start <= day <= end:
             total += _num(row, key)
     return total
+
+
+def _period(rows: Sequence[Mapping[str, str]], start: date, end: date) -> dict[str, Any]:
+    """Sums over ENABLED and PAUSED campaigns for one period; ratios only with a non-zero denominator."""
+    cost = _day_sum(rows, "metrics.cost_micros", start, end) / 1_000_000
+    clicks = _day_sum(rows, "metrics.clicks", start, end)
+    impressions = _day_sum(rows, "metrics.impressions", start, end)
+    conversions = _day_sum(rows, "metrics.conversions", start, end)
+    return {
+        "start": start.isoformat(), "end": end.isoformat(), "cost": round(cost, 2), "clicks": int(clicks),
+        "impressions": int(impressions), "conversions": round(conversions, 2),
+        "ctr_percent": round(clicks / impressions * 100, 2) if impressions else None,
+        "cpa": round(cost / conversions, 2) if conversions else None,
+    }
 
 
 def _pacing(campaign_rows: Sequence[Mapping[str, str]], last: date, budget: float) -> tuple[str, str, dict[str, Any]]:
@@ -221,8 +237,14 @@ def evaluate(
     ampel = {3: "red", 2: "yellow"}.get(worst, "green")
     if all(c.status == "unknown" for c in checks):
         ampel = "unknown"
+    span = CONVERSION_WINDOW_DAYS
+    summary = {
+        "days": span,
+        "last": _period(rows, last - timedelta(days=span - 1), last),
+        "previous": _period(rows, last - timedelta(days=2 * span - 1), last - timedelta(days=span)),
+    }
     return WatchResult(ampel, tuple(checks), first.isoformat(), last.isoformat(), as_of.isoformat(), currency,
-                       tuple(missing), query_id)
+                       tuple(missing), query_id, summary)
 
 
 def describe(check: WatchCheck, tr: Translator, currency: str) -> tuple[str, str | None]:
@@ -231,6 +253,15 @@ def describe(check: WatchCheck, tr: Translator, currency: str) -> tuple[str, str
     for key in ("budget", "max_cost"):
         if key in params:
             params[key] = tr.money(float(params[key]), currency)
+    for key, value in list(params.items()):
+        if key == "newest":
+            params[key] = tr.date(str(value))
+        elif isinstance(value, bool):
+            continue
+        elif isinstance(value, int):
+            params[key] = tr.number(value, 0)
+        elif isinstance(value, float):
+            params[key] = tr.number(value, 0 if value == int(value) else 2)
     params["campaign"] = check.campaign_name or ""
     text = tr.t(check.message_key(), **{key: str(value) for key, value in params.items()})
     hint = tr.t(check.hint_key()) if tr.has(check.hint_key()) else None

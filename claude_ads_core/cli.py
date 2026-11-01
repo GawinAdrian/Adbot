@@ -13,9 +13,10 @@ from typing import Any, Sequence
 from . import __version__
 from .adapters import AdapterError, GenericCSVExportAdapter
 from .contracts import CONTRACT_NAMES, ContractError, load_contract, validate_contract
+from .cockpit import CockpitError, build_cockpit
 from .doctor import render_text, run_doctor, to_json
 from .i18n import I18nError, SUPPORTED_LANGUAGES, Translator, normalize_language
-from .reporting import ReportRenderError, write_report_bundle
+from .reporting import ReportRenderError, atomic_write_report, write_report_bundle
 from .product_status import ProductStatusError, evaluate_product_status
 from .scoring import ScoringError, score_account, score_portfolio
 from .tenants import DEFAULT_TENANT_ROOT, TenantError, TenantRegistry
@@ -100,6 +101,16 @@ def build_parser() -> argparse.ArgumentParser:
     watch_show = watch_commands.add_parser("show", help="print a stored watch-result in the user's language")
     watch_show.add_argument("path")
     watch_show.add_argument("--lang", choices=SUPPORTED_LANGUAGES, default=None)
+
+    cockpit = commands.add_parser("cockpit", help="build the local overview page (one HTML file, no network)")
+    cockpit_commands = cockpit.add_subparsers(dest="cockpit_command", required=True)
+    cockpit_build = cockpit_commands.add_parser("build", help="render cockpit.html next to a stored watch-result")
+    cockpit_build.add_argument("--watch-result", required=True, help="watch-result.json from a watcher run")
+    cockpit_build.add_argument("--recommendations", default=None, help="JSON list, at most 3 items")
+    cockpit_build.add_argument("--approvals", default=None, help="JSON list of pending approvals")
+    cockpit_build.add_argument("--changes", default=None, help="JSON list: change log")
+    cockpit_build.add_argument("--lang", choices=SUPPORTED_LANGUAGES, default=None)
+    cockpit_build.add_argument("--profile-dir", default=None)
 
     settings = commands.add_parser("settings", help="manage local user settings (language, market, cadence)")
     settings_commands = settings.add_subparsers(dest="settings_command", required=True)
@@ -227,6 +238,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                 requested = args.lang or environment.get("ADBOT_LANG") or context.get("language")
                 print(render_text(checks, Translator(normalize_language(requested))), end="")
             return 1 if any(check.status == "fail" for check in checks) else 0
+        elif args.command == "cockpit":
+            result = _read_json(args.watch_result)
+            directory = Path(args.profile_dir).expanduser() if args.profile_dir else profile_dir()
+            language = args.lang or os.environ.get("ADBOT_LANG")
+            if not language:
+                language = load_settings(directory / SETTINGS_FILENAME)["language"]
+            page = build_cockpit(
+                result, lang=normalize_language(language), created=result["as_of"],
+                recommendations=_read_json(args.recommendations) if args.recommendations else None,
+                approvals=_read_json(args.approvals) if args.approvals else None,
+                changes=_read_json(args.changes) if args.changes else None,
+            )
+            run_dir = Path(args.watch_result).resolve().parent
+            written = atomic_write_report(run_dir.parent, f"{run_dir.name}/cockpit.html", page)
+            _emit({"path": str(written), "lang": normalize_language(language), "status": "built"})
         elif args.command == "watch":
             if args.watch_command == "run":
                 directory = Path(args.profile_dir).expanduser() if args.profile_dir else profile_dir()
@@ -280,7 +306,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 _emit(registry.summary(registry.resolve_account(args.platform, args.account_id)))
         elif args.command == "ingest-export":
             _emit(GenericCSVExportAdapter(args.platform).read_snapshot(args.path))
-    except (AdapterError, ContractError, I18nError, ProductStatusError, ReportRenderError, ScoringError, SettingsError, TenantError, WatchError) as exc:
+    except (AdapterError, ContractError, I18nError, ProductStatusError, ReportRenderError, ScoringError, SettingsError, TenantError, WatchError, CockpitError) as exc:
         print(json.dumps({"status": "invalid", "error": str(exc)}, sort_keys=True), file=sys.stderr)
         return 2
     return 0
