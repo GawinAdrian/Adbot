@@ -140,6 +140,9 @@ def run_doctor(
 
     account = settings["active_account_ref"] if settings else None
     checks.append(Check("account", "ok" if account else "warn", "ok" if account else "warn"))
+    attested = settings["disk_encryption_attested_on"] if settings else None
+    checks.append(Check("encryption", "ok" if attested else "warn", "ok" if attested else "warn",
+                        {"date": attested} if attested else {}))
 
     if not online:
         checks.append(Check("api", "skip", "skip"))

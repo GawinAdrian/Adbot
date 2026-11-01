@@ -364,7 +364,7 @@ def _validate_user_settings(payload: Mapping[str, Any]) -> None:
     """Validate local user settings: language, market and watch/report cadence (no secrets)."""
     required = (
         "schema_version", "artifact_type", "updated_at", "language", "country", "currency",
-        "timezone", "active_account_ref", "cadence",
+        "timezone", "active_account_ref", "disk_encryption_attested_on", "cadence",
     )
     doc = _exact(payload, "$", required)
     if doc["schema_version"] != SCHEMA_VERSION:
@@ -378,6 +378,8 @@ def _validate_user_settings(payload: Mapping[str, Any]) -> None:
     _string(doc["timezone"], "$.timezone", pattern=r"[A-Za-z_]+(/[A-Za-z0-9_+-]+)+")
     if doc["active_account_ref"] is not None:
         _string(doc["active_account_ref"], "$.active_account_ref", pattern=r"[0-9]{10}")
+    if doc["disk_encryption_attested_on"] is not None:
+        _date(doc["disk_encryption_attested_on"], "$.disk_encryption_attested_on")
     cadence = _exact(doc["cadence"], "$.cadence", ("watch", "report", "report_weekday", "deep_review"))
     _enum(cadence["watch"], "$.cadence.watch", {"daily", "off"})
     _enum(cadence["report"], "$.cadence.report", {"weekly", "biweekly", "monthly", "on-demand"})

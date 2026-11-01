@@ -142,4 +142,65 @@ MESSAGES = {'report.title': 'Adbot – Auditbericht',
                                       'gehört; trage eine Verwaltungskonto-ID nur bei Zugriff über '
                                       'ein Verwaltungskonto ein (Anleitung 09).',
  'doctor.api.unknown': 'Google Ads hat nicht wie erwartet geantwortet.',
- 'doctor.api.unknown.next': 'Siehe die Fehlerbehebung (Anleitung 09).'}
+ 'doctor.api.unknown.next': 'Siehe die Fehlerbehebung (Anleitung 09).',
+ 'doctor.encryption.ok': 'Festplattenverschlüsselung wurde am {date} bestätigt.',
+ 'doctor.encryption.warn': 'Festplattenverschlüsselung (FileVault oder BitLocker) wurde nicht '
+                           'bestätigt.',
+ 'doctor.encryption.warn.next': 'Schalte sie ein und bestätige sie mit: settings set '
+                                '--disk-encryption-attested JJJJ-MM-TT.',
+ 'watch.ampel.green': 'Grün: nichts braucht Aufmerksamkeit.',
+ 'watch.ampel.yellow': 'Gelb: bitte einmal hinschauen.',
+ 'watch.ampel.red': 'Rot: bald handeln.',
+ 'watch.ampel.unknown': 'Grau: zu wenig Daten für eine Einschätzung.',
+ 'watch.data.normal': 'Die neuesten Daten sind vom {newest}.',
+ 'watch.data.gap': 'Die neuesten Daten sind {days} Tage alt (vom {newest}).',
+ 'watch.data.gap.hint': 'Datenabruf erneut ausführen; prüfen, ob der Rechner an und angemeldet '
+                        'war.',
+ 'watch.campaigns.none_enabled': 'In den Daten wurde keine aktive Kampagne gefunden.',
+ 'watch.campaigns.none_enabled.hint': 'Falls eine Kampagne laufen sollte, prüfe ihren Status in '
+                                      'Google Ads.',
+ 'watch.pacing.normal': '{campaign}: Die Tagesausgaben liegen im üblichen Bereich.',
+ 'watch.pacing.capped': '{campaign}: Das Tagesbudget ({budget}) war an den letzten {days} Tagen '
+                        'jeweils fast aufgebraucht.',
+ 'watch.pacing.capped.hint': 'Die Kampagne wird womöglich vom Budget begrenzt. Entscheide, ob mehr '
+                             'Budget sinnvoll ist; ändere es nur nach Freigabe.',
+ 'watch.pacing.under': '{campaign}: Die Ausgaben lagen an den letzten {days} Tagen jeweils weit '
+                       'unter dem Tagesbudget ({budget}).',
+ 'watch.pacing.under.hint': 'Prüfe Keywords, Gebote und Standort-Einstellungen; die Anzeigen '
+                            'werden womöglich selten gezeigt.',
+ 'watch.pacing.over': '{campaign}: Ein Tag kostete {max_cost}, deutlich über dem Tagesbudget '
+                      '({budget}).',
+ 'watch.pacing.over.hint': 'Sieh dir die Kosten pro Tag in Google Ads an; prüfe, ob sich eine '
+                           'Einstellung geändert hat.',
+ 'watch.pacing.unknown': '{campaign}: Das Tagesbudget konnte nicht gelesen werden.',
+ 'watch.delivery.normal': '{campaign}: Die Anzeigen werden ausgespielt.',
+ 'watch.delivery.stopped': '{campaign}: In den letzten {days} Tagen wurde keine Anzeige gezeigt, '
+                           'obwohl es vorher der Fall war.',
+ 'watch.delivery.stopped.hint': 'Prüfe Kampagnenstatus, Budget, Zahlung und ob Anzeigen abgelehnt '
+                                'wurden.',
+ 'watch.conversions.normal': '{campaign}: Die Conversions wirken für die erhaltenen Klicks normal.',
+ 'watch.conversions.insufficient': '{campaign}: nur {clicks} Klicks in {days} Tagen; zu wenig, um '
+                                   'Conversions zu beurteilen (Minimum {minimum}).',
+ 'watch.conversions.insufficient.hint': 'Warte auf mehr Daten, bevor du etwas änderst.',
+ 'watch.conversions.drop': '{campaign}: Keine Conversions in den letzten {days} Tagen bei {clicks} '
+                           'Klicks, obwohl es in den {days} Tagen davor {previous} waren.',
+ 'watch.conversions.drop.hint': 'Prüfe zuerst das Conversion-Tracking (Formular, Anruf, Tag, '
+                                'Website-Änderung), bevor du die Anzeigen beurteilst.',
+ 'watch.conversions.none': '{campaign}: Keine Conversions in {days} Tagen bei {clicks} Klicks, und '
+                           'auch keine in den {days} Tagen davor.',
+ 'watch.conversions.none.hint': 'Prüfe, ob das Conversion-Tracking eingerichtet ist und '
+                                'funktioniert und ob die Zielseite zur Anzeige passt.',
+ 'watch.policy.normal': 'Es wurden keine abgelehnten Anzeigen gemeldet.',
+ 'watch.policy.disapproved': '{count} Anzeige(n) wurden von Google abgelehnt.',
+ 'watch.policy.disapproved.hint': 'Öffne die Anzeigen in Google Ads, lies den Grund und korrigiere '
+                                  'Text oder Seite.',
+ 'watch.policy.unknown': 'Der Genehmigungsstatus der Anzeigen wurde nicht gelesen.',
+ 'watch.policy.unknown.hint': 'Nimm die Abfrage zum Anzeigenstatus in den täglichen Datenabruf '
+                              'auf.',
+ 'watch.missing.policy': 'Genehmigungsstatus der Anzeigen',
+ 'watch.missing.billing': 'Abrechnungs- und Zahlungsstatus (mit dem unterstützten Zugriff nicht '
+                          'lesbar)',
+ 'enum.check_status.normal': 'OK',
+ 'enum.check_status.warning': 'Hinweis',
+ 'enum.check_status.critical': 'Problem',
+ 'enum.check_status.unknown': 'Unklar'}

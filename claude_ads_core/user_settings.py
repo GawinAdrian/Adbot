@@ -60,6 +60,7 @@ def default_settings(language: str, now: datetime | None = None) -> dict[str, An
         "language": code,
         **MARKET_DEFAULTS[code],
         "active_account_ref": None,
+        "disk_encryption_attested_on": None,
         "cadence": dict(DEFAULT_CADENCE),
     }
 

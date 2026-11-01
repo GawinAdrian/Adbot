@@ -140,4 +140,63 @@ MESSAGES = {'report.title': 'Adbot – raport z audytu',
                                       'Ads; identyfikator konta menedżera ustaw tylko przy '
                                       'dostępie przez konto menedżera (instrukcja 09).',
  'doctor.api.unknown': 'Google Ads nie odpowiedział zgodnie z oczekiwaniami.',
- 'doctor.api.unknown.next': 'Zobacz rozwiązywanie problemów (instrukcja 09).'}
+ 'doctor.api.unknown.next': 'Zobacz rozwiązywanie problemów (instrukcja 09).',
+ 'doctor.encryption.ok': 'Szyfrowanie dysku potwierdzono dnia {date}.',
+ 'doctor.encryption.warn': 'Szyfrowanie dysku (FileVault lub BitLocker) nie zostało potwierdzone.',
+ 'doctor.encryption.warn.next': 'Włącz je, a potem potwierdź poleceniem: settings set '
+                                '--disk-encryption-attested RRRR-MM-DD.',
+ 'watch.ampel.green': 'Zielony: nic nie wymaga uwagi.',
+ 'watch.ampel.yellow': 'Żółty: proszę rzucić okiem.',
+ 'watch.ampel.red': 'Czerwony: trzeba wkrótce działać.',
+ 'watch.ampel.unknown': 'Szary: za mało danych, by ocenić.',
+ 'watch.data.normal': 'Najnowsze dane pochodzą z dnia {newest}.',
+ 'watch.data.gap': 'Najnowsze dane mają {days} dni (z dnia {newest}).',
+ 'watch.data.gap.hint': 'Uruchom pobieranie danych ponownie; sprawdź, czy komputer był włączony i '
+                        'zalogowany.',
+ 'watch.campaigns.none_enabled': 'W danych nie znaleziono aktywnej kampanii.',
+ 'watch.campaigns.none_enabled.hint': 'Jeśli kampania powinna działać, sprawdź jej status w Google '
+                                      'Ads.',
+ 'watch.pacing.normal': '{campaign}: dzienne wydatki mieszczą się w zwykłym zakresie.',
+ 'watch.pacing.capped': '{campaign}: budżet dzienny ({budget}) był prawie wykorzystany w każdym z '
+                        'ostatnich {days} dni.',
+ 'watch.pacing.capped.hint': 'Kampania może być ograniczona budżetem. Zdecyduj, czy większy budżet '
+                             'ma sens; zmieniaj go tylko po zatwierdzeniu.',
+ 'watch.pacing.under': '{campaign}: wydatki były w każdym z ostatnich {days} dni znacznie poniżej '
+                       'budżetu dziennego ({budget}).',
+ 'watch.pacing.under.hint': 'Sprawdź słowa kluczowe, stawki i ustawienia lokalizacji; reklamy mogą '
+                            'rzadko się wyświetlać.',
+ 'watch.pacing.over': '{campaign}: jeden dzień kosztował {max_cost}, wyraźnie powyżej budżetu '
+                      'dziennego ({budget}).',
+ 'watch.pacing.over.hint': 'Zobacz koszty dzienne w Google Ads; sprawdź, czy nie zmieniło się '
+                           'jakieś ustawienie.',
+ 'watch.pacing.unknown': '{campaign}: nie udało się odczytać budżetu dziennego.',
+ 'watch.delivery.normal': '{campaign}: reklamy są wyświetlane.',
+ 'watch.delivery.stopped': '{campaign}: w ostatnich {days} dniach nie wyświetlono żadnej reklamy, '
+                           'choć wcześniej tak było.',
+ 'watch.delivery.stopped.hint': 'Sprawdź status kampanii, budżet, płatność i czy reklamy nie '
+                                'zostały odrzucone.',
+ 'watch.conversions.normal': '{campaign}: konwersje wyglądają normalnie przy otrzymanej liczbie '
+                             'kliknięć.',
+ 'watch.conversions.insufficient': '{campaign}: tylko {clicks} kliknięć w {days} dniach; za mało, '
+                                   'by ocenić konwersje (minimum {minimum}).',
+ 'watch.conversions.insufficient.hint': 'Poczekaj na więcej danych, zanim cokolwiek zmienisz.',
+ 'watch.conversions.drop': '{campaign}: brak konwersji w ostatnich {days} dniach przy {clicks} '
+                           'kliknięciach, choć w {days} dniach wcześniej było ich {previous}.',
+ 'watch.conversions.drop.hint': 'Najpierw sprawdź śledzenie konwersji (formularz, telefon, tag, '
+                                'zmiana strony), a dopiero potem oceniaj reklamy.',
+ 'watch.conversions.none': '{campaign}: brak konwersji w {days} dniach przy {clicks} kliknięciach, '
+                           'a także w {days} dniach wcześniej.',
+ 'watch.conversions.none.hint': 'Sprawdź, czy śledzenie konwersji jest skonfigurowane i działa '
+                                'oraz czy strona docelowa pasuje do reklamy.',
+ 'watch.policy.normal': 'Nie zgłoszono odrzuconych reklam.',
+ 'watch.policy.disapproved': 'Liczba reklam odrzuconych przez Google: {count}.',
+ 'watch.policy.disapproved.hint': 'Otwórz reklamy w Google Ads, przeczytaj powód i popraw tekst '
+                                  'lub stronę.',
+ 'watch.policy.unknown': 'Nie odczytano statusu zatwierdzenia reklam.',
+ 'watch.policy.unknown.hint': 'Dodaj zapytanie o status reklam do codziennego pobierania danych.',
+ 'watch.missing.policy': 'status zatwierdzenia reklam',
+ 'watch.missing.billing': 'status rozliczeń i płatności (niedostępny przy obsługiwanym dostępie)',
+ 'enum.check_status.normal': 'OK',
+ 'enum.check_status.warning': 'Uwaga',
+ 'enum.check_status.critical': 'Problem',
+ 'enum.check_status.unknown': 'Niejasne'}

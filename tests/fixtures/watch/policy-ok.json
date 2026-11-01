@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "platform": "google",
+  "customer_id": "1234567890",
+  "login_customer_id": null,
+  "api_version": "v26",
+  "query_id": "ad-policy-v1",
+  "query": "SELECT campaign.id, ad_group_ad.policy_summary.approval_status FROM ad_group_ad",
+  "retrieved_at": "2026-11-02T06:00:00Z",
+  "rows": [
+    {
+      "customer.id": "1234567890",
+      "campaign.id": "222000111",
+      "ad_group_ad.policy_summary.approval_status": "APPROVED"
+    }
+  ]
+}

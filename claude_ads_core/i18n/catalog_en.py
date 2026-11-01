@@ -99,4 +99,61 @@ MESSAGES = {'report.title': 'Claude Ads Audit Report',
  'doctor.api.permission_denied.next': 'Sign in with the Google account that owns the Ads account; '
                                       'set a manager ID only for manager access (guide 09).',
  'doctor.api.unknown': 'Google Ads did not answer as expected.',
- 'doctor.api.unknown.next': 'See the troubleshooting guide (09).'}
+ 'doctor.api.unknown.next': 'See the troubleshooting guide (09).',
+ 'doctor.encryption.ok': 'Disk encryption was confirmed on {date}.',
+ 'doctor.encryption.warn': 'Disk encryption (FileVault or BitLocker) has not been confirmed.',
+ 'doctor.encryption.warn.next': 'Turn it on, then confirm it with: settings set '
+                                '--disk-encryption-attested YYYY-MM-DD.',
+ 'watch.ampel.green': 'Green: nothing needs attention.',
+ 'watch.ampel.yellow': 'Yellow: please have a look.',
+ 'watch.ampel.red': 'Red: act soon.',
+ 'watch.ampel.unknown': 'Grey: not enough data to judge.',
+ 'watch.data.normal': 'The newest data is from {newest}.',
+ 'watch.data.gap': 'The newest data is {days} days old (from {newest}).',
+ 'watch.data.gap.hint': 'Run the data pull again; check the computer was on and signed in.',
+ 'watch.campaigns.none_enabled': 'No active campaign was found in the data.',
+ 'watch.campaigns.none_enabled.hint': 'If a campaign should be running, check its status in Google '
+                                      'Ads.',
+ 'watch.pacing.normal': '{campaign}: daily spending is within the usual range.',
+ 'watch.pacing.capped': '{campaign}: the daily budget ({budget}) was almost used up on each of the '
+                        'last {days} days.',
+ 'watch.pacing.capped.hint': 'The campaign may be limited by budget. Decide whether more budget is '
+                             'worth it; change it only after approval.',
+ 'watch.pacing.under': '{campaign}: spending was far below the daily budget ({budget}) on each of '
+                       'the last {days} days.',
+ 'watch.pacing.under.hint': 'Check keywords, bids, and location settings; the ads may rarely be '
+                            'shown.',
+ 'watch.pacing.over': '{campaign}: one day cost {max_cost}, well above the daily budget '
+                      '({budget}).',
+ 'watch.pacing.over.hint': 'Look at the cost per day in Google Ads; check whether a setting '
+                           'changed.',
+ 'watch.pacing.unknown': '{campaign}: the daily budget could not be read.',
+ 'watch.delivery.normal': '{campaign}: the ads are being shown.',
+ 'watch.delivery.stopped': '{campaign}: no ad was shown during the last {days} days, although it '
+                           'was shown before.',
+ 'watch.delivery.stopped.hint': 'Check the campaign status, the budget, payment, and whether ads '
+                                'were rejected.',
+ 'watch.conversions.normal': '{campaign}: conversions look normal for the clicks received.',
+ 'watch.conversions.insufficient': '{campaign}: only {clicks} clicks in {days} days; too few to '
+                                   'judge conversions (minimum {minimum}).',
+ 'watch.conversions.insufficient.hint': 'Wait for more data before changing anything.',
+ 'watch.conversions.drop': '{campaign}: no conversions in the last {days} days after {clicks} '
+                           'clicks, although the {days} days before had {previous}.',
+ 'watch.conversions.drop.hint': 'Check conversion tracking first (form, phone call, tag, website '
+                                'change) before judging the ads.',
+ 'watch.conversions.none': '{campaign}: no conversions in {days} days with {clicks} clicks, and '
+                           'none in the {days} days before.',
+ 'watch.conversions.none.hint': 'Check whether conversion tracking is set up and working, and '
+                                'whether the landing page matches the ad.',
+ 'watch.policy.normal': 'No rejected ads were reported.',
+ 'watch.policy.disapproved': '{count} ad(s) were rejected by Google.',
+ 'watch.policy.disapproved.hint': 'Open the ads in Google Ads, read the reason, and fix the text '
+                                  'or page.',
+ 'watch.policy.unknown': 'The approval status of the ads was not read.',
+ 'watch.policy.unknown.hint': 'Add the ad policy query to the daily data pull.',
+ 'watch.missing.policy': 'ad approval status',
+ 'watch.missing.billing': 'billing and payment status (not readable with the supported access)',
+ 'enum.check_status.normal': 'OK',
+ 'enum.check_status.warning': 'Notice',
+ 'enum.check_status.critical': 'Problem',
+ 'enum.check_status.unknown': 'Unknown'}
