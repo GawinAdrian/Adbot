@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_type": "keyword-ideas",
+  "run_id": "fixture-keyword-ideas-2026-09",
+  "created_at": "2026-09-01T08:30:00Z",
+  "platform": "google",
+  "customer_id": "1234567890",
+  "login_customer_id": "1122334455",
+  "api_version": "v25",
+  "query_id": "sanitized-service-cluster-v1",
+  "seed": {
+    "keywords": ["beispiel dienstleistung", "beispiel dienstleistung anbieter"],
+    "url": null
+  },
+  "geo_target_constants": ["geoTargetConstants/2276"],
+  "language": "languageConstants/1001",
+  "keyword_plan_network": "GOOGLE_SEARCH",
+  "retrieved_at": "2026-09-01T08:29:57Z",
+  "ideas": [
+    {
+      "text": "beispiel dienstleistung",
+      "avg_monthly_searches": 1300,
+      "competition": "LOW",
+      "competition_index": 18,
+      "low_top_of_page_bid_micros": 640000,
+      "high_top_of_page_bid_micros": 2210000,
+      "close_variants": ["beispieldienstleistung"]
+    },
+    {
+      "text": "beispiel dienstleistung anbieter",
+      "avg_monthly_searches": 210,
+      "competition": "MEDIUM",
+      "competition_index": 47,
+      "low_top_of_page_bid_micros": 910000,
+      "high_top_of_page_bid_micros": 3470000,
+      "close_variants": []
+    },
+    {
+      "text": "beispiel dienstleistung kosten",
+      "avg_monthly_searches": 90,
+      "competition": "HIGH",
+      "competition_index": 88,
+      "low_top_of_page_bid_micros": 1120000,
+      "high_top_of_page_bid_micros": 5030000,
+      "close_variants": []
+    },
+    {
+      "text": "beispiel dienstleistung mittelstand",
+      "avg_monthly_searches": null,
+      "competition": "UNKNOWN",
+      "competition_index": null,
+      "low_top_of_page_bid_micros": null,
+      "high_top_of_page_bid_micros": null,
+      "close_variants": []
+    }
+  ]
+}
