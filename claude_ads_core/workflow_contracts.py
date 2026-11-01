@@ -24,6 +24,7 @@ WORKFLOW_CONTRACT_NAMES = (
     "data-lifecycle",
     "setup-profile",
     "tenant-profile",
+    "user-settings",
     "brand-profile",
     "keyword-ideas",
     "media-plan",
@@ -357,6 +358,32 @@ def _validate_tenant(payload: Mapping[str, Any]) -> None:
     lifecycle = _validate_data_lifecycle_at(doc["data_lifecycle"], "$.data_lifecycle")
     if doc["privacy_class"] != lifecycle["classification"]:
         raise WorkflowContractError("$.privacy_class must match $.data_lifecycle.classification")
+
+
+def _validate_user_settings(payload: Mapping[str, Any]) -> None:
+    """Validate local user settings: language, market and watch/report cadence (no secrets)."""
+    required = (
+        "schema_version", "artifact_type", "updated_at", "language", "country", "currency",
+        "timezone", "active_account_ref", "cadence",
+    )
+    doc = _exact(payload, "$", required)
+    if doc["schema_version"] != SCHEMA_VERSION:
+        raise WorkflowContractError(f"$.schema_version must equal {SCHEMA_VERSION!r}")
+    if doc["artifact_type"] != "user-settings":
+        raise WorkflowContractError("$.artifact_type must equal 'user-settings'")
+    _datetime(doc["updated_at"], "$.updated_at")
+    _enum(doc["language"], "$.language", {"de", "pl"})
+    _enum(doc["country"], "$.country", {"DE", "PL"})
+    _string(doc["currency"], "$.currency", pattern=r"[A-Z]{3}")
+    _string(doc["timezone"], "$.timezone", pattern=r"[A-Za-z_]+(/[A-Za-z0-9_+-]+)+")
+    if doc["active_account_ref"] is not None:
+        _string(doc["active_account_ref"], "$.active_account_ref", pattern=r"[0-9]{10}")
+    cadence = _exact(doc["cadence"], "$.cadence", ("watch", "report", "report_weekday", "deep_review"))
+    _enum(cadence["watch"], "$.cadence.watch", {"daily", "off"})
+    _enum(cadence["report"], "$.cadence.report", {"weekly", "biweekly", "monthly", "on-demand"})
+    _enum(cadence["report_weekday"], "$.cadence.report_weekday",
+          {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"})
+    _enum(cadence["deep_review"], "$.cadence.deep_review", {"monthly", "quarterly", "off"})
 
 
 def _validate_brand(payload: Mapping[str, Any]) -> None:
@@ -786,6 +813,7 @@ WORKFLOW_VALIDATORS: dict[str, Callable[[Mapping[str, Any]], None]] = {
     "data-lifecycle": _validate_data_lifecycle,
     "setup-profile": _validate_setup,
     "tenant-profile": _validate_tenant,
+    "user-settings": _validate_user_settings,
     "brand-profile": _validate_brand,
     "keyword-ideas": _validate_keyword_ideas,
     "media-plan": _validate_media_plan,
