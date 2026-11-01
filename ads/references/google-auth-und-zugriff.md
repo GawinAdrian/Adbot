@@ -17,7 +17,8 @@ stated to users as fact.
 | 7 | Users review and revoke app access at their Google Account permissions page. | confirmed | "OAuth overview" (2026-10-30) |
 | 8 | OAuth consent screen in status "Testing": refresh tokens expire after 7 days. Admin session policies can force re-authentication after 1–24 hours (`invalid_grant`). | confirmed | "Using OAuth 2.0 to access Google APIs" (2026-10-29) |
 | 9 | The OAuth overview page still says "A developer token is required in addition to OAuth credentials", which contradicts findings 1–3. | contradiction; **practical result 2026-11-01: no token needed** (MCP server and `scripts/gaql_via_api.py`, API v26). Recorded in CLM-0215. | "OAuth overview" |
-| 10 | The scope string for the Google Ads API is `https://www.googleapis.com/auth/adwords` (used in the runbook; not re-read on the pages above). | unconfirmed in this refresh | existing runbook |
+| 10 | The scope string for the Google Ads API is `https://www.googleapis.com/auth/adwords`; the OAuth client may be Desktop app or Web application; a consent screen in Testing status is limited to added test users. | confirmed | "Set up a Google API Console project" (2026-10-30); CLM-0224 |
+| 13 | `gcloud auth application-default revoke` deletes the local credential file; the page does not say whether the grant is also revoked at Google. Disconnecting therefore also uses the Google Account permissions page (finding 7). | confirmed (with the stated limit) | gcloud reference; CLM-0225 |
 
 ## Consequences for Adbot
 
@@ -33,5 +34,4 @@ stated to users as fact.
 
 ## Open checks
 
-1. Re-read the user-authentication page for the exact scope string and desktop-client steps (finding 10); owner: PRP step 5.
-2. Planning services (keyword ideas) with a Basic-access project have not been re-run since the token sunset.
+1. Planning services (keyword ideas) with a Basic-access project have not been re-run since the token sunset.

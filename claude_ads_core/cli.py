@@ -13,7 +13,8 @@ from typing import Any, Sequence
 from . import __version__
 from .adapters import AdapterError, GenericCSVExportAdapter
 from .contracts import CONTRACT_NAMES, ContractError, load_contract, validate_contract
-from .i18n import I18nError, SUPPORTED_LANGUAGES, normalize_language
+from .doctor import render_text, run_doctor, to_json
+from .i18n import I18nError, SUPPORTED_LANGUAGES, Translator, normalize_language
 from .reporting import ReportRenderError, write_report_bundle
 from .product_status import ProductStatusError, evaluate_product_status
 from .scoring import ScoringError, score_account, score_portfolio
@@ -79,6 +80,12 @@ def build_parser() -> argparse.ArgumentParser:
     ingest = commands.add_parser("ingest-export", help="normalize a generic CSV export")
     ingest.add_argument("--platform", required=True)
     ingest.add_argument("path")
+
+    doctor = commands.add_parser("doctor", help="check the installation and the Google connection (read-only)")
+    doctor.add_argument("--lang", choices=SUPPORTED_LANGUAGES, default=None, help="message language; default: ADBOT_LANG, settings, then en")
+    doctor.add_argument("--json", action="store_true", help="machine-readable result without free text")
+    doctor.add_argument("--online", action="store_true", help="also test a read-only request to Google Ads")
+    doctor.add_argument("--profile-dir", default=None, help="defaults to ADBOT_PROFILE_DIR or ~/.config/adbot/standard")
 
     settings = commands.add_parser("settings", help="manage local user settings (language, market, cadence)")
     settings_commands = settings.add_subparsers(dest="settings_command", required=True)
@@ -186,6 +193,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             if requested:  # keep the established output contract unchanged unless a language was chosen
                 result["lang"] = lang
             _emit(result)
+        elif args.command == "doctor":
+            environment = dict(os.environ)
+            if args.profile_dir:
+                environment["ADBOT_PROFILE_DIR"] = str(Path(args.profile_dir).expanduser())
+            checks, context = run_doctor(environment, online=args.online)
+            if args.json:
+                _emit(to_json(checks))
+            else:
+                requested = args.lang or environment.get("ADBOT_LANG") or context.get("language")
+                print(render_text(checks, Translator(normalize_language(requested))), end="")
+            return 1 if any(check.status == "fail" for check in checks) else 0
         elif args.command == "settings":
             directory = Path(args.profile_dir).expanduser() if args.profile_dir else profile_dir()
             target = directory / SETTINGS_FILENAME
