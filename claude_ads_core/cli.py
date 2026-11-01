@@ -19,6 +19,7 @@ from .reporting import ReportRenderError, write_report_bundle
 from .product_status import ProductStatusError, evaluate_product_status
 from .scoring import ScoringError, score_account, score_portfolio
 from .tenants import DEFAULT_TENANT_ROOT, TenantError, TenantRegistry
+from .watch import WatchCheck, WatchError, render_watch_text, run_watch
 from .user_settings import SETTINGS_FILENAME, SettingsError, default_settings, load_settings, profile_dir, save_settings
 
 
@@ -87,6 +88,19 @@ def build_parser() -> argparse.ArgumentParser:
     doctor.add_argument("--online", action="store_true", help="also test a read-only request to Google Ads")
     doctor.add_argument("--profile-dir", default=None, help="defaults to ADBOT_PROFILE_DIR or ~/.config/adbot/standard")
 
+    watch = commands.add_parser("watch", help="deterministic daily watcher over stored live-read data (no AI, read-only)")
+    watch_commands = watch.add_subparsers(dest="watch_command", required=True)
+    watch_run = watch_commands.add_parser("run", help="evaluate stored data and write a new run directory")
+    watch_run.add_argument("--live", required=True, help="stored campaign-by-day live-read envelope")
+    watch_run.add_argument("--policy", default=None, help="stored ad approval-status envelope (optional)")
+    watch_run.add_argument("--customer", default=None, help="10-digit customer ID; default: active account in settings")
+    watch_run.add_argument("--as-of", default=None, help="YYYY-MM-DD; default: today (UTC)")
+    watch_run.add_argument("--out", default=".adbot/runs", help="parent directory for new run directories")
+    watch_run.add_argument("--profile-dir", default=None)
+    watch_show = watch_commands.add_parser("show", help="print a stored watch-result in the user's language")
+    watch_show.add_argument("path")
+    watch_show.add_argument("--lang", choices=SUPPORTED_LANGUAGES, default=None)
+
     settings = commands.add_parser("settings", help="manage local user settings (language, market, cadence)")
     settings_commands = settings.add_subparsers(dest="settings_command", required=True)
     settings_init = settings_commands.add_parser("init", help="create default settings for a language")
@@ -98,6 +112,8 @@ def build_parser() -> argparse.ArgumentParser:
     settings_set = settings_commands.add_parser("set", help="change selected settings (validated before writing)")
     settings_set.add_argument("--profile-dir", default=None)
     settings_set.add_argument("--account", help="10-digit Google Ads customer ID, or 'none'")
+    settings_set.add_argument("--disk-encryption-attested", metavar="YYYY-MM-DD|none",
+                              help="date on which you confirmed FileVault/BitLocker is on, or 'none'")
     settings_set.add_argument("--watch", choices=("daily", "off"))
     settings_set.add_argument("--report", choices=("weekly", "biweekly", "monthly", "on-demand"))
     settings_set.add_argument("--weekday", choices=("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"))
@@ -211,6 +227,20 @@ def main(argv: Sequence[str] | None = None) -> int:
                 requested = args.lang or environment.get("ADBOT_LANG") or context.get("language")
                 print(render_text(checks, Translator(normalize_language(requested))), end="")
             return 1 if any(check.status == "fail" for check in checks) else 0
+        elif args.command == "watch":
+            if args.watch_command == "run":
+                directory = Path(args.profile_dir).expanduser() if args.profile_dir else profile_dir()
+                current = load_settings(directory / SETTINGS_FILENAME)
+                customer = (args.customer or current["active_account_ref"] or "").replace("-", "")
+                if not customer:
+                    raise SettingsError("no active account: pass --customer or run settings set --account")
+                as_of = date.fromisoformat(args.as_of) if args.as_of else datetime.now(timezone.utc).date()
+                _emit(run_watch(args.live, customer, as_of=as_of, out_dir=args.out, policy_envelope=args.policy,
+                                attested_on=current["disk_encryption_attested_on"], timezone_name=current["timezone"]))
+            else:
+                result = _read_json(args.path)
+                tr = Translator(normalize_language(args.lang or os.environ.get("ADBOT_LANG") or "en"))
+                print(render_watch_text(result, tr), end="")
         elif args.command == "settings":
             directory = Path(args.profile_dir).expanduser() if args.profile_dir else profile_dir()
             target = directory / SETTINGS_FILENAME
@@ -223,6 +253,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 current = load_settings(target)
                 if args.account is not None:
                     current["active_account_ref"] = None if args.account == "none" else args.account.replace("-", "")
+                if args.disk_encryption_attested is not None:
+                    current["disk_encryption_attested_on"] = None if args.disk_encryption_attested == "none" else args.disk_encryption_attested
                 for option, key in (("watch", "watch"), ("report", "report"), ("weekday", "report_weekday"), ("deep_review", "deep_review")):
                     value = getattr(args, option)
                     if value is not None:
@@ -248,7 +280,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 _emit(registry.summary(registry.resolve_account(args.platform, args.account_id)))
         elif args.command == "ingest-export":
             _emit(GenericCSVExportAdapter(args.platform).read_snapshot(args.path))
-    except (AdapterError, ContractError, I18nError, ProductStatusError, ReportRenderError, ScoringError, SettingsError, TenantError) as exc:
+    except (AdapterError, ContractError, I18nError, ProductStatusError, ReportRenderError, ScoringError, SettingsError, TenantError, WatchError) as exc:
         print(json.dumps({"status": "invalid", "error": str(exc)}, sort_keys=True), file=sys.stderr)
         return 2
     return 0

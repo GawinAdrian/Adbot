@@ -200,5 +200,5 @@
       }
     }
   },
-  "user-settings": {"schema_version": "1.0.0", "artifact_type": "user-settings", "updated_at": "2026-11-01T08:00:00Z", "language": "pl", "country": "PL", "currency": "PLN", "timezone": "Europe/Warsaw", "active_account_ref": "1234567890", "cadence": {"watch": "daily", "report": "weekly", "report_weekday": "monday", "deep_review": "monthly"}}
+  "user-settings": {"schema_version": "1.0.0", "artifact_type": "user-settings", "updated_at": "2026-11-01T08:00:00Z", "language": "pl", "country": "PL", "currency": "PLN", "timezone": "Europe/Warsaw", "active_account_ref": "1234567890", "disk_encryption_attested_on": "2026-11-01", "cadence": {"watch": "daily", "report": "weekly", "report_weekday": "monday", "deep_review": "monthly"}}
 }

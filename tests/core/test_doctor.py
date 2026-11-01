@@ -155,10 +155,10 @@ def test_every_message_key_exists_in_all_catalogs():
     states = {
         "python": ("ok", "fail"), "uv": ("ok", "warn"), "gcloud": ("ok", "warn"), "settings": ("ok", "fail"),
         "project": ("ok", "fail"), "credentials": ("ok", "fail", "invalid"), "account": ("ok", "warn"),
-        "api": ("ok", "skip", "invalid_grant", "permission_denied", "unknown"),
+        "api": ("ok", "skip", "invalid_grant", "permission_denied", "unknown"), "encryption": ("ok", "warn"),
     }
     needs_next = {("python", "fail"), ("uv", "warn"), ("gcloud", "warn"), ("settings", "fail"), ("project", "fail"),
-                  ("credentials", "fail"), ("credentials", "invalid"), ("account", "warn"),
+                  ("credentials", "fail"), ("credentials", "invalid"), ("account", "warn"), ("encryption", "warn"),
                   ("api", "invalid_grant"), ("api", "permission_denied"), ("api", "unknown")}
     for language in ("en", "de", "pl"):
         catalog = load_catalog(language)
@@ -191,7 +191,7 @@ def test_json_result_has_stable_ids_and_no_free_text(tmp_path):
     checks, _ = run_doctor({}, home=_profile(tmp_path), which=_which(ALL_TOOLS), python_version=(3, 12))
     payload = to_json(checks)
     assert payload["connected"] is True and payload["ok"] is True
-    assert [c["id"] for c in payload["checks"]] == ["python", "uv", "gcloud", "settings", "project", "credentials", "account", "api"]
+    assert [c["id"] for c in payload["checks"]] == ["python", "uv", "gcloud", "settings", "project", "credentials", "account", "encryption", "api"]
     assert set(payload["checks"][0]) == {"id", "status", "state"}
 
 
