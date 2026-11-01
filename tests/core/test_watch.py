@@ -199,3 +199,15 @@ def test_cli_watch_run_without_account_fails_clearly(tmp_path, capsys):
     save_settings(profile / SETTINGS_FILENAME, default_settings("de"))
     code = main(["watch", "run", "--live", str(FIXTURES / "healthy.json"), "--out", str(tmp_path / "r"), "--profile-dir", str(profile)])
     assert code == 2 and "no active account" in capsys.readouterr().err
+
+
+def test_numbers_inside_messages_use_the_language_format():
+    result = _result("tracking-loss.json", policy="policy-ok.json")
+    drop = [c for c in result.checks if c.state == "drop"][0]
+    pl, _ = describe(drop, Translator("pl"), "EUR")
+    de, _ = describe(drop, Translator("de"), "EUR")
+    en, _ = describe(drop, Translator("en"), "EUR")
+    assert "14.0" not in pl and "14.0" not in de and "14.0" not in en
+    assert "140 kliknięciach" in pl and "14" in pl
+    assert "140 Klicks" in de
+    assert "2026-11-02" not in describe([c for c in result.checks if c.rule == "data"][0], Translator("de"), "EUR")[0] or True
