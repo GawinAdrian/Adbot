@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import date
+from datetime import date, datetime, timezone
 import json
 import os
 import sys
@@ -95,6 +95,13 @@ def build_parser() -> argparse.ArgumentParser:
     settings_init.add_argument("--force", action="store_true", help="overwrite existing settings")
     settings_show = settings_commands.add_parser("show", help="print the validated settings")
     settings_show.add_argument("--profile-dir", default=None)
+    settings_set = settings_commands.add_parser("set", help="change selected settings (validated before writing)")
+    settings_set.add_argument("--profile-dir", default=None)
+    settings_set.add_argument("--account", help="10-digit Google Ads customer ID, or 'none'")
+    settings_set.add_argument("--watch", choices=("daily", "off"))
+    settings_set.add_argument("--report", choices=("weekly", "biweekly", "monthly", "on-demand"))
+    settings_set.add_argument("--weekday", choices=("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"))
+    settings_set.add_argument("--deep-review", choices=("monthly", "quarterly", "off"))
 
     tenant = commands.add_parser("tenant", help="manage tenant profiles beneath the local state root")
     tenant_commands = tenant.add_subparsers(dest="tenant_command", required=True)
@@ -212,6 +219,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                     raise SettingsError(f"settings already exist: {target.name} (use --force to overwrite)")
                 save_settings(target, default_settings(args.lang))
                 _emit({"path": str(target), "status": "created", "lang": args.lang})
+            elif args.settings_command == "set":
+                current = load_settings(target)
+                if args.account is not None:
+                    current["active_account_ref"] = None if args.account == "none" else args.account.replace("-", "")
+                for option, key in (("watch", "watch"), ("report", "report"), ("weekday", "report_weekday"), ("deep_review", "deep_review")):
+                    value = getattr(args, option)
+                    if value is not None:
+                        current["cadence"][key] = value
+                current["updated_at"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+                save_settings(target, current)
+                _emit({"path": str(target), "status": "updated"})
             else:
                 _emit(load_settings(target))
         elif args.command == "tenant":

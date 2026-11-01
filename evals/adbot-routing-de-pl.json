@@ -1,0 +1,106 @@
+[
+  {
+    "id": "de-status",
+    "prompt": "Wie steht meine Werbung gerade?",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-audit",
+      "ads-google",
+      "ads-monitor"
+    ]
+  },
+  {
+    "id": "de-first-campaign",
+    "prompt": "Lege meine erste Kampagne an, Budget 20 Euro am Tag",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-launch",
+      "ads-plan"
+    ]
+  },
+  {
+    "id": "de-connect",
+    "prompt": "Verbinde mein Google-Konto mit Adbot",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-setup"
+    ]
+  },
+  {
+    "id": "de-disconnect",
+    "prompt": "Trenne mein Google-Konto wieder",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-setup"
+    ]
+  },
+  {
+    "id": "de-weekly-report",
+    "prompt": "Zeig mir den Wochenbericht",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-report",
+      "ads-monitor"
+    ]
+  },
+  {
+    "id": "de-optimise",
+    "prompt": "Was soll ich bei meiner Werbung optimieren?",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-optimize"
+    ]
+  },
+  {
+    "id": "pl-status",
+    "prompt": "Jak stoją moje reklamy?",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-audit",
+      "ads-google",
+      "ads-monitor"
+    ]
+  },
+  {
+    "id": "pl-first-campaign",
+    "prompt": "Utwórz moją pierwszą kampanię, budżet 60 złotych dziennie",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-launch",
+      "ads-plan"
+    ]
+  },
+  {
+    "id": "pl-connect",
+    "prompt": "Połącz moje konto Google z Adbotem",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-setup"
+    ]
+  },
+  {
+    "id": "pl-disconnect",
+    "prompt": "Odłącz konto Google",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-setup"
+    ]
+  },
+  {
+    "id": "pl-weekly-report",
+    "prompt": "Pokaż raport tygodniowy",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-report",
+      "ads-monitor"
+    ]
+  },
+  {
+    "id": "pl-optimise",
+    "prompt": "Co powinienem zoptymalizować w reklamach?",
+    "expected_skill": "ads-assistent",
+    "forbidden_skills": [
+      "ads-optimize"
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "goal": "Mehr Anfragen für Heizungswartung",
+  "goal_kind": "leads",
+  "daily_budget": "15",
+  "currency": "EUR",
+  "region": "Dresden und 30 km Umkreis",
+  "conversion_definition": "Ausgefülltes Kontaktformular oder Anruf über 30 Sekunden",
+  "offer": "Heizungswartung für Privathaushalte",
+  "website": "https://example.invalid/wartung",
+  "language": "de",
+  "confirmed_by_user": true,
+  "confirmed_at": "2026-11-01T09:00:00Z"
+}
