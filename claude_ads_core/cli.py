@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from datetime import date
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any, Sequence
@@ -12,10 +13,12 @@ from typing import Any, Sequence
 from . import __version__
 from .adapters import AdapterError, GenericCSVExportAdapter
 from .contracts import CONTRACT_NAMES, ContractError, load_contract, validate_contract
+from .i18n import I18nError, SUPPORTED_LANGUAGES, normalize_language
 from .reporting import ReportRenderError, write_report_bundle
 from .product_status import ProductStatusError, evaluate_product_status
 from .scoring import ScoringError, score_account, score_portfolio
 from .tenants import DEFAULT_TENANT_ROOT, TenantError, TenantRegistry
+from .user_settings import SETTINGS_FILENAME, SettingsError, default_settings, load_settings, profile_dir, save_settings
 
 
 def _read_json(path: str) -> Any:
@@ -66,10 +69,25 @@ def build_parser() -> argparse.ArgumentParser:
     render.add_argument("--format", choices=("markdown", "html", "pdf"), default="markdown")
     render.add_argument("--root", default=".claude-ads/runs", help="safe root for report artifacts")
     render.add_argument("--output", help="relative output path; defaults to <run-id>/report.<extension>")
+    render.add_argument(
+        "--lang",
+        choices=SUPPORTED_LANGUAGES,
+        default=None,
+        help="report language; defaults to the ADBOT_LANG environment variable, then en",
+    )
 
     ingest = commands.add_parser("ingest-export", help="normalize a generic CSV export")
     ingest.add_argument("--platform", required=True)
     ingest.add_argument("path")
+
+    settings = commands.add_parser("settings", help="manage local user settings (language, market, cadence)")
+    settings_commands = settings.add_subparsers(dest="settings_command", required=True)
+    settings_init = settings_commands.add_parser("init", help="create default settings for a language")
+    settings_init.add_argument("--lang", required=True, choices=("de", "pl"))
+    settings_init.add_argument("--profile-dir", default=None, help="defaults to ADBOT_PROFILE_DIR or ~/.config/adbot/standard")
+    settings_init.add_argument("--force", action="store_true", help="overwrite existing settings")
+    settings_show = settings_commands.add_parser("show", help="print the validated settings")
+    settings_show.add_argument("--profile-dir", default=None)
 
     tenant = commands.add_parser("tenant", help="manage tenant profiles beneath the local state root")
     tenant_commands = tenant.add_subparsers(dest="tenant_command", required=True)
@@ -156,15 +174,28 @@ def main(argv: Sequence[str] | None = None) -> int:
             bundle = load_contract("report-bundle", args.path)
             extension = {"markdown": "md", "html": "html", "pdf": "pdf"}[args.format]
             destination = args.output or f"{bundle['run_manifest']['run_id']}/report.{extension}"
-            output_path = write_report_bundle(bundle, args.format, args.root, destination)
-            _emit(
-                {
-                    "format": args.format,
-                    "path": str(output_path),
-                    "run_id": bundle["run_manifest"]["run_id"],
-                    "status": "rendered",
-                }
-            )
+            requested = args.lang or os.environ.get("ADBOT_LANG")
+            lang = normalize_language(requested)
+            output_path = write_report_bundle(bundle, args.format, args.root, destination, lang)
+            result = {
+                "format": args.format,
+                "path": str(output_path),
+                "run_id": bundle["run_manifest"]["run_id"],
+                "status": "rendered",
+            }
+            if requested:  # keep the established output contract unchanged unless a language was chosen
+                result["lang"] = lang
+            _emit(result)
+        elif args.command == "settings":
+            directory = Path(args.profile_dir).expanduser() if args.profile_dir else profile_dir()
+            target = directory / SETTINGS_FILENAME
+            if args.settings_command == "init":
+                if target.exists() and not args.force:
+                    raise SettingsError(f"settings already exist: {target.name} (use --force to overwrite)")
+                save_settings(target, default_settings(args.lang))
+                _emit({"path": str(target), "status": "created", "lang": args.lang})
+            else:
+                _emit(load_settings(target))
         elif args.command == "tenant":
             registry = TenantRegistry(getattr(args, "root", DEFAULT_TENANT_ROOT))
             if args.tenant_command == "validate":
@@ -181,7 +212,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 _emit(registry.summary(registry.resolve_account(args.platform, args.account_id)))
         elif args.command == "ingest-export":
             _emit(GenericCSVExportAdapter(args.platform).read_snapshot(args.path))
-    except (AdapterError, ContractError, ProductStatusError, ReportRenderError, ScoringError, TenantError) as exc:
+    except (AdapterError, ContractError, I18nError, ProductStatusError, ReportRenderError, ScoringError, SettingsError, TenantError) as exc:
         print(json.dumps({"status": "invalid", "error": str(exc)}, sort_keys=True), file=sys.stderr)
         return 2
     return 0

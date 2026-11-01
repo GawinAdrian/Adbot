@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .contracts import ContractError, validate_contract
+from .i18n import Translator
 
 
 class ReportRenderError(ValueError):
@@ -39,13 +40,6 @@ _SENSITIVE_KEY_RE = re.compile(
     r"password|passwd|authorization|cookie|set[_-]?cookie|email|phone)([_-]|$)"
 )
 _CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
-
-_STATUS_LABELS = {
-    "normal": "Normal",
-    "provisional": "Provisional",
-    "insufficient_evidence": "Insufficient evidence",
-}
-_COMPLETENESS_LABELS = {"complete": "Complete", "partial": "Partial", "failed": "Failed"}
 
 
 def _redact_text(value: str) -> str:
@@ -101,14 +95,29 @@ def _validated_bundle(bundle: Mapping[str, Any]) -> Mapping[str, Any]:
     return bundle
 
 
-def _score_text(score: Any) -> str:
-    if score is None:
-        return "Not scored"
-    return f"{float(score):.2f} / 100"
+def _score_text(score: Any, tr: Translator | None = None) -> str:
+    tr = tr or Translator("en")
+    return tr.score(None if score is None else float(score))
 
 
-def _coverage_text(coverage: Any) -> str:
-    return f"{float(coverage):.2f}%"
+def _coverage_text(coverage: Any, tr: Translator | None = None) -> str:
+    tr = tr or Translator("en")
+    return tr.percent(float(coverage))
+
+
+def _category_label(tr: Translator, value: Any) -> str:
+    """Localized category name; unknown categories keep the legacy title-case text."""
+    if value is None:
+        return tr.t("report.uncategorized")
+    text = str(value)
+    if tr.has(f"enum.category.{text}"):
+        return tr.label("category", text)
+    return text.title()
+
+
+def _unspecified(tr: Translator) -> str:
+    text = tr.t("report.not_specified")
+    return text.title() if tr.language == "en" else text
 
 
 def _controls(bundle: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
@@ -123,14 +132,15 @@ def _categories(bundle: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     return sorted(bundle["scoring"]["categories"], key=lambda category: str(category.get("category", "")))
 
 
-def _extension_item_text(item: Any) -> str:
+def _extension_item_text(item: Any, tr: Translator | None = None) -> str:
+    tr = tr or Translator("en")
     if isinstance(item, str):
         return _text(item)
     if isinstance(item, Mapping):
         preferred = ("summary", "title", "action", "claim", "description", "recommendation")
         headline = next((_text(item[key]) for key in preferred if item.get(key)), "")
         details = [
-            f"{str(key).replace('_', ' ').title()}: {_text(value)}"
+            f"{tr.label('item_key', key)}: {_text(value)}"
             for key, value in sorted(item.items(), key=lambda pair: str(pair[0]))
             if key not in preferred and value not in (None, "", [], {})
         ]
@@ -155,9 +165,10 @@ def _actions(bundle: Mapping[str, Any]) -> list[Any]:
     ]
 
 
-def render_markdown(bundle: Mapping[str, Any]) -> str:
-    """Render a validated ReportBundle as deterministic Markdown."""
+def render_markdown(bundle: Mapping[str, Any], lang: str | None = "en") -> str:
+    """Render a validated ReportBundle as deterministic Markdown in *lang* (de, pl, en)."""
 
+    tr = Translator(lang)
     bundle = _validated_bundle(bundle)
     manifest = bundle["run_manifest"]
     snapshot = bundle["account_snapshot"]
@@ -168,69 +179,70 @@ def render_markdown(bundle: Mapping[str, Any]) -> str:
     account = snapshot["account"]
 
     lines = [
-        "# Claude Ads Audit Report",
+        f"# {tr.t('report.title')}",
         "",
-        f"> Run completeness: **{_COMPLETENESS_LABELS[completeness]}** · Evidence status: **{_STATUS_LABELS[score_status]}**",
+        f"> {tr.t('report.run_completeness')}: **{tr.label('completeness', completeness)}** · "
+        f"{tr.t('report.evidence_status')}: **{tr.label('score_status', score_status)}**",
         "",
-        "## Run summary",
+        f"## {tr.t('report.run_summary')}",
         "",
-        f"- Run ID: {_md(manifest['run_id'])}",
-        f"- Started: {_md(manifest['started_at'])}",
-        f"- Platform: {_md(str(account['platform']).title())}",
-        f"- Account: {_md(account.get('name') or account['account_id'])}",
-        f"- Window: {_md(snapshot['window']['start'])} to {_md(snapshot['window']['end'])}",
-        f"- Privacy class: {_md(str(manifest['privacy_class']).title())}",
+        f"- {tr.t('report.run_id')}: {_md(manifest['run_id'])}",
+        f"- {tr.t('report.started')}: {_md(manifest['started_at'])}",
+        f"- {tr.t('report.platform')}: {_md(str(account['platform']).title())}",
+        f"- {tr.t('report.account')}: {_md(account.get('name') or account['account_id'])}",
+        f"- {tr.t('report.window')}: {_md(tr.t('report.window_range', start=snapshot['window']['start'], end=snapshot['window']['end']))}",
+        f"- {tr.t('report.privacy_class')}: {_md(tr.label('privacy_class', manifest['privacy_class']))}",
         "",
-        "## Decision status",
+        f"## {tr.t('report.decision_status')}",
         "",
-        f"- Run completeness: **{_COMPLETENESS_LABELS[completeness]}**",
-        f"- Evidence status: **{_STATUS_LABELS[score_status]}**",
-        f"- Health score: **{_score_text(scoring['health_score'])}**",
-        f"- Evidence coverage: **{_coverage_text(scoring['evidence_coverage'])}**",
+        f"- {tr.t('report.run_completeness')}: **{tr.label('completeness', completeness)}**",
+        f"- {tr.t('report.evidence_status')}: **{tr.label('score_status', score_status)}**",
+        f"- {tr.t('report.health_score')}: **{_score_text(scoring['health_score'], tr)}**",
+        f"- {tr.t('report.evidence_coverage')}: **{_coverage_text(scoring['evidence_coverage'], tr)}**",
     ]
     if completeness != "complete":
-        lines.extend(("", "> WARNING: Required work did not complete; this report must not be presented as a complete audit."))
+        lines.extend(("", f"> {tr.t('report.warning_label_md')} {tr.t('report.warn_incomplete')}"))
     if score_status == "provisional":
-        lines.extend(("", "> WARNING: The health score is provisional because evidence coverage is below the normal threshold."))
+        lines.extend(("", f"> {tr.t('report.warning_label_md')} {tr.t('report.warn_provisional')}"))
     elif score_status == "insufficient_evidence":
-        lines.extend(("", "> WARNING: Evidence is insufficient for a defensible health score."))
+        lines.extend(("", f"> {tr.t('report.warning_label_md')} {tr.t('report.warn_insufficient')}"))
 
-    lines.extend(("", "## Category health", ""))
+    lines.extend(("", f"## {tr.t('report.category_health')}", ""))
     categories = _categories(bundle)
     if categories:
         for category in categories:
             lines.append(
-                f"- **{_md(str(category.get('category', 'Uncategorized')).title())}:** "
-                f"{_score_text(category.get('health_score'))}; evidence {_coverage_text(category.get('evidence_coverage', 0))}"
+                f"- **{_md(_category_label(tr, category.get('category')))}:** "
+                f"{_score_text(category.get('health_score'), tr)}; {tr.t('report.evidence_lower')} {_coverage_text(category.get('evidence_coverage', 0), tr)}"
             )
     else:
-        lines.append("No category scores were supplied.")
+        lines.append(tr.t("report.no_categories"))
 
-    lines.extend(("", "## Findings", ""))
+    lines.extend(("", f"## {tr.t('report.findings')}", ""))
     findings = _findings(bundle)
     if not findings:
-        lines.append("No findings were supplied.")
+        lines.append(tr.t("report.no_findings"))
     for finding in findings:
         control = controls.get(str(finding["control_id"]), {})
         heading = (
-            f"### [{_md(str(finding['status']).replace('_', ' ').upper())}] "
-            f"{_md(finding['control_id'])} — {_md(str(control.get('category', 'uncategorized')).title())}"
+            f"### [{_md(tr.label('finding_status', finding['status']).upper())}] "
+            f"{_md(finding['control_id'])} — {_md(_category_label(tr, control.get('category', 'uncategorized')))}"
         )
         lines.extend(
             (
                 heading,
                 "",
-                f"- Severity: {_md(str(control.get('severity', 'not specified')).title())}",
-                f"- Confidence: {_md(str(finding['confidence']).title())}",
-                f"- Source classification: {_md(str(finding.get('source_classification', 'not specified')).replace('_', ' ').title())}",
+                f"- {tr.t('report.severity')}: {_md(tr.label('severity', control['severity']) if 'severity' in control else _unspecified(tr))}",
+                f"- {tr.t('report.confidence')}: {_md(tr.label('confidence', finding['confidence']))}",
+                f"- {tr.t('report.source_classification')}: {_md(tr.label('source_classification', finding['source_classification']) if 'source_classification' in finding else _unspecified(tr))}",
                 "",
-                f"**Observation:** {_md(finding['observation']) or 'Not supplied.'}",
+                f"**{tr.t('report.observation')}:** {_md(finding['observation']) or tr.t('report.not_supplied')}",
                 "",
-                f"**Diagnosis:** {_md(finding['diagnosis']) or 'Not supplied.'}",
+                f"**{tr.t('report.diagnosis')}:** {_md(finding['diagnosis']) or tr.t('report.not_supplied')}",
                 "",
-                f"**Recommended action:** {_md(finding['recommendation']) or 'No action supplied.'}",
+                f"**{tr.t('report.recommended_action')}:** {_md(finding['recommendation']) or tr.t('report.no_action')}",
                 "",
-                "**Evidence:**",
+                f"**{tr.t('report.evidence')}:**",
                 "",
             )
         )
@@ -238,23 +250,23 @@ def render_markdown(bundle: Mapping[str, Any]) -> str:
             for index, evidence in enumerate(finding["evidence"], start=1):
                 lines.extend((f"{index}.", "", f"        {_canonical_json(evidence)}", ""))
         else:
-            lines.extend(("No evidence was supplied.", ""))
+            lines.extend((tr.t("report.no_evidence"), ""))
 
-    lines.extend(("## Contradictions", ""))
+    lines.extend((f"## {tr.t('report.contradictions')}", ""))
     contradictions = list(bundle.get("contradictions", []))
     if contradictions:
-        lines.extend(f"- {_md(_extension_item_text(item))}" for item in contradictions)
+        lines.extend(f"- {_md(_extension_item_text(item, tr))}" for item in contradictions)
     else:
-        lines.append("No contradictions were reported.")
+        lines.append(tr.t("report.no_contradictions"))
 
-    lines.extend(("", "## Prioritized actions", ""))
+    lines.extend(("", f"## {tr.t('report.prioritized_actions')}", ""))
     actions = _actions(bundle)
     if actions:
-        lines.extend(f"{index}. {_md(_extension_item_text(item))}" for index, item in enumerate(actions, start=1))
+        lines.extend(f"{index}. {_md(_extension_item_text(item, tr))}" for index, item in enumerate(actions, start=1))
     else:
-        lines.append("No follow-up actions were reported.")
+        lines.append(tr.t("report.no_actions"))
 
-    lines.extend(("", "---", "", "Generated deterministically from ReportBundle JSON. Scores were not recalculated.", ""))
+    lines.extend(("", "---", "", tr.t("report.footer"), ""))
     return "\n".join(lines)
 
 
@@ -265,9 +277,10 @@ main{max-width:960px;margin:32px auto;padding:40px;background:var(--paper);box-s
 """.strip()
 
 
-def render_html(bundle: Mapping[str, Any]) -> str:
-    """Render a validated ReportBundle as self-contained deterministic HTML."""
+def render_html(bundle: Mapping[str, Any], lang: str | None = "en") -> str:
+    """Render a validated ReportBundle as self-contained deterministic HTML in *lang*."""
 
+    tr = Translator(lang)
     bundle = _validated_bundle(bundle)
     manifest = bundle["run_manifest"]
     snapshot = bundle["account_snapshot"]
@@ -278,87 +291,90 @@ def render_html(bundle: Mapping[str, Any]) -> str:
     account = snapshot["account"]
     warnings: list[str] = []
     if completeness != "complete":
-        warnings.append("Required work did not complete; this report must not be presented as a complete audit.")
+        warnings.append(tr.t("report.warn_incomplete"))
     if score_status == "provisional":
-        warnings.append("The health score is provisional because evidence coverage is below the normal threshold.")
+        warnings.append(tr.t("report.warn_provisional"))
     elif score_status == "insufficient_evidence":
-        warnings.append("Evidence is insufficient for a defensible health score.")
+        warnings.append(tr.t("report.warn_insufficient"))
 
     category_html = "".join(
-        "<li><strong>{}</strong>: {}; evidence {}</li>".format(
-            _html(str(category.get("category", "Uncategorized")).title()),
-            _html(_score_text(category.get("health_score"))),
-            _html(_coverage_text(category.get("evidence_coverage", 0))),
+        ("<li><strong>{}</strong>: {}; " + html.escape(tr.t("report.evidence_lower")) + " {}</li>").format(
+            _html(_category_label(tr, category.get("category"))),
+            _html(_score_text(category.get("health_score"), tr)),
+            _html(_coverage_text(category.get("evidence_coverage", 0), tr)),
         )
         for category in _categories(bundle)
-    ) or "<li>No category scores were supplied.</li>"
+    ) or f"<li>{_html(tr.t('report.no_categories'))}</li>"
 
     finding_parts: list[str] = []
     for finding in _findings(bundle):
         control = controls.get(str(finding["control_id"]), {})
         evidence = "".join(f"<pre>{html.escape(_canonical_json(item))}</pre>" for item in finding["evidence"])
         if not evidence:
-            evidence = "<p>No evidence was supplied.</p>"
+            evidence = f"<p>{_html(tr.t('report.no_evidence'))}</p>"
         status = str(finding["status"])
         finding_parts.append(
             f'<article class="finding status-{html.escape(status)}">'
-            f"<h3>[{_html(status.replace('_', ' ').upper())}] {_html(finding['control_id'])} — "
-            f"{_html(str(control.get('category', 'uncategorized')).title())}</h3>"
+            f"<h3>[{_html(tr.label('finding_status', status).upper())}] {_html(finding['control_id'])} — "
+            f"{_html(_category_label(tr, control.get('category', 'uncategorized')))}</h3>"
             "<dl>"
-            f"<dt>Severity</dt><dd>{_html(str(control.get('severity', 'not specified')).title())}</dd>"
-            f"<dt>Confidence</dt><dd>{_html(str(finding['confidence']).title())}</dd>"
-            f"<dt>Source classification</dt><dd>{_html(str(finding.get('source_classification', 'not specified')).replace('_', ' ').title())}</dd>"
-            f"<dt>Observation</dt><dd>{_html(finding['observation']) or 'Not supplied.'}</dd>"
-            f"<dt>Diagnosis</dt><dd>{_html(finding['diagnosis']) or 'Not supplied.'}</dd>"
-            f"<dt>Recommended action</dt><dd>{_html(finding['recommendation']) or 'No action supplied.'}</dd>"
-            f"</dl><h4>Evidence</h4>{evidence}</article>"
+            f"<dt>{_html(tr.t('report.severity'))}</dt><dd>{_html(tr.label('severity', control['severity']) if 'severity' in control else _unspecified(tr))}</dd>"
+            f"<dt>{_html(tr.t('report.confidence'))}</dt><dd>{_html(tr.label('confidence', finding['confidence']))}</dd>"
+            f"<dt>{_html(tr.t('report.source_classification'))}</dt><dd>{_html(tr.label('source_classification', finding['source_classification']) if 'source_classification' in finding else _unspecified(tr))}</dd>"
+            f"<dt>{_html(tr.t('report.observation'))}</dt><dd>{_html(finding['observation']) or html.escape(tr.t('report.not_supplied'))}</dd>"
+            f"<dt>{_html(tr.t('report.diagnosis'))}</dt><dd>{_html(finding['diagnosis']) or html.escape(tr.t('report.not_supplied'))}</dd>"
+            f"<dt>{_html(tr.t('report.recommended_action'))}</dt><dd>{_html(finding['recommendation']) or html.escape(tr.t('report.no_action'))}</dd>"
+            f"</dl><h4>{_html(tr.t('report.evidence'))}</h4>{evidence}</article>"
         )
-    findings_html = "".join(finding_parts) or "<p>No findings were supplied.</p>"
+    findings_html = "".join(finding_parts) or f"<p>{_html(tr.t('report.no_findings'))}</p>"
 
     contradictions = list(bundle.get("contradictions", []))
     contradictions_html = (
-        "<ul>" + "".join(f"<li>{_html(_extension_item_text(item))}</li>" for item in contradictions) + "</ul>"
+        "<ul>" + "".join(f"<li>{_html(_extension_item_text(item, tr))}</li>" for item in contradictions) + "</ul>"
         if contradictions
-        else "<p>No contradictions were reported.</p>"
+        else f"<p>{_html(tr.t('report.no_contradictions'))}</p>"
     )
     actions = _actions(bundle)
     actions_html = (
-        "<ol>" + "".join(f"<li>{_html(_extension_item_text(item))}</li>" for item in actions) + "</ol>"
+        "<ol>" + "".join(f"<li>{_html(_extension_item_text(item, tr))}</li>" for item in actions) + "</ol>"
         if actions
-        else "<p>No follow-up actions were reported.</p>"
+        else f"<p>{_html(tr.t('report.no_actions'))}</p>"
     )
-    warnings_html = "".join(f'<p class="warning"><strong>Warning:</strong> {_html(item)}</p>' for item in warnings)
+    warnings_html = "".join(
+        f'<p class="warning"><strong>{_html(tr.t("report.warning_label"))}</strong> {_html(item)}</p>' for item in warnings
+    )
 
+    title = _html(tr.t("report.title"))
     return (
-        "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
+        f"<!doctype html>\n<html lang=\"{tr.language}\"><head><meta charset=\"utf-8\">"
         "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-        "<title>Claude Ads Audit Report</title><style>" + _HTML_STYLE + "</style></head><body><main>"
-        "<h1>Claude Ads Audit Report</h1>"
-        f'<p class="banner {html.escape(completeness)} {html.escape(score_status)}">Run completeness: '
-        f"{_html(_COMPLETENESS_LABELS[completeness])} · Evidence status: {_html(_STATUS_LABELS[score_status])}</p>"
-        "<h2>Run summary</h2><dl class=\"meta\">"
-        f"<dt>Run ID</dt><dd>{_html(manifest['run_id'])}</dd><dt>Started</dt><dd>{_html(manifest['started_at'])}</dd>"
-        f"<dt>Platform</dt><dd>{_html(str(account['platform']).title())}</dd>"
-        f"<dt>Account</dt><dd>{_html(account.get('name') or account['account_id'])}</dd>"
-        f"<dt>Window</dt><dd>{_html(snapshot['window']['start'])} to {_html(snapshot['window']['end'])}</dd>"
-        f"<dt>Privacy class</dt><dd>{_html(str(manifest['privacy_class']).title())}</dd></dl>"
-        "<h2>Decision status</h2><div class=\"metrics\">"
-        f'<div class="metric">Run completeness<strong>{_html(_COMPLETENESS_LABELS[completeness])}</strong></div>'
-        f'<div class="metric">Evidence status<strong>{_html(_STATUS_LABELS[score_status])}</strong></div>'
-        f'<div class="metric">Health score<strong>{_html(_score_text(scoring["health_score"]))}</strong></div>'
-        f'<div class="metric">Evidence coverage<strong>{_html(_coverage_text(scoring["evidence_coverage"]))}</strong></div></div>'
+        f"<title>{title}</title><style>" + _HTML_STYLE + f"</style></head><body><main><h1>{title}</h1>"
+        f'<p class="banner {html.escape(completeness)} {html.escape(score_status)}">{_html(tr.t("report.run_completeness"))}: '
+        f"{_html(tr.label('completeness', completeness))} · {_html(tr.t('report.evidence_status'))}: {_html(tr.label('score_status', score_status))}</p>"
+        f"<h2>{_html(tr.t('report.run_summary'))}</h2><dl class=\"meta\">"
+        f"<dt>{_html(tr.t('report.run_id'))}</dt><dd>{_html(manifest['run_id'])}</dd>"
+        f"<dt>{_html(tr.t('report.started'))}</dt><dd>{_html(manifest['started_at'])}</dd>"
+        f"<dt>{_html(tr.t('report.platform'))}</dt><dd>{_html(str(account['platform']).title())}</dd>"
+        f"<dt>{_html(tr.t('report.account'))}</dt><dd>{_html(account.get('name') or account['account_id'])}</dd>"
+        f"<dt>{_html(tr.t('report.window'))}</dt><dd>{_html(tr.t('report.window_range', start=snapshot['window']['start'], end=snapshot['window']['end']))}</dd>"
+        f"<dt>{_html(tr.t('report.privacy_class'))}</dt><dd>{_html(tr.label('privacy_class', manifest['privacy_class']))}</dd></dl>"
+        f"<h2>{_html(tr.t('report.decision_status'))}</h2><div class=\"metrics\">"
+        f'<div class="metric">{_html(tr.t("report.run_completeness"))}<strong>{_html(tr.label("completeness", completeness))}</strong></div>'
+        f'<div class="metric">{_html(tr.t("report.evidence_status"))}<strong>{_html(tr.label("score_status", score_status))}</strong></div>'
+        f'<div class="metric">{_html(tr.t("report.health_score"))}<strong>{_html(_score_text(scoring["health_score"], tr))}</strong></div>'
+        f'<div class="metric">{_html(tr.t("report.evidence_coverage"))}<strong>{_html(_coverage_text(scoring["evidence_coverage"], tr))}</strong></div></div>'
         + warnings_html
-        + f"<h2>Category health</h2><ul>{category_html}</ul><h2>Findings</h2>{findings_html}"
-        + f"<h2>Contradictions</h2>{contradictions_html}<h2>Prioritized actions</h2>{actions_html}"
-        + "<footer>Generated deterministically from ReportBundle JSON. Scores were not recalculated.</footer>"
+        + f"<h2>{_html(tr.t('report.category_health'))}</h2><ul>{category_html}</ul><h2>{_html(tr.t('report.findings'))}</h2>{findings_html}"
+        + f"<h2>{_html(tr.t('report.contradictions'))}</h2>{contradictions_html}<h2>{_html(tr.t('report.prioritized_actions'))}</h2>{actions_html}"
+        + f"<footer>{_html(tr.t('report.footer'))}</footer>"
         + "</main></body></html>\n"
     )
 
 
-def render_pdf(bundle: Mapping[str, Any]) -> bytes:
+def render_pdf(bundle: Mapping[str, Any], lang: str | None = "en") -> bytes:
     """Render PDF bytes through the optional WeasyPrint bridge."""
 
-    source = render_html(bundle)
+    source = render_html(bundle, lang)
     try:
         weasyprint = importlib.import_module("weasyprint")
     except (ImportError, OSError) as exc:
@@ -375,16 +391,16 @@ def render_pdf(bundle: Mapping[str, Any]) -> bytes:
     return result
 
 
-def render_report(bundle: Mapping[str, Any], output_format: str) -> str | bytes:
-    """Render *bundle* to ``markdown``, ``html``, or ``pdf``."""
+def render_report(bundle: Mapping[str, Any], output_format: str, lang: str | None = "en") -> str | bytes:
+    """Render *bundle* to ``markdown``, ``html``, or ``pdf`` in *lang* (de, pl, en)."""
 
     normalized = output_format.lower()
     if normalized in {"md", "markdown"}:
-        return render_markdown(bundle)
+        return render_markdown(bundle, lang)
     if normalized == "html":
-        return render_html(bundle)
+        return render_html(bundle, lang)
     if normalized == "pdf":
-        return render_pdf(bundle)
+        return render_pdf(bundle, lang)
     raise ReportRenderError("format must be one of: markdown, html, pdf")
 
 
@@ -454,7 +470,8 @@ def write_report_bundle(
     output_format: str,
     root: str | Path,
     destination: str | Path,
+    lang: str | None = "en",
 ) -> Path:
     """Validate, render, and atomically write a report bundle."""
 
-    return atomic_write_report(root, destination, render_report(bundle, output_format))
+    return atomic_write_report(root, destination, render_report(bundle, output_format, lang))
