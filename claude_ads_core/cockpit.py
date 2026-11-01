@@ -76,8 +76,7 @@ def _e(value: object) -> str:
 def _term(term_id: str, tr: Translator) -> tuple[str, str]:
     for term in glossary()["terms"]:
         if term["id"] == term_id:
-            return (term[tr.language] if tr.language in {"de", "pl", "en"} else term["en"],
-                    term.get(f"explain_{tr.language}", term["explain_de"]))
+            return term[tr.language], term[f"explain_{tr.language}"]
     raise CockpitError(f"unknown glossary term {term_id!r}")
 
 
@@ -190,5 +189,6 @@ def build_cockpit(
         f"<h2>{_e(tr.t('cockpit.changes'))}</h2>{changes_html}"
         f"<h2>{_e(tr.t('cockpit.notes'))}</h2>{notes_html}"
         f"<details><summary>{_e(tr.t('cockpit.checks'))}</summary><table><tbody>{all_rows}</tbody></table></details>"
-        f"<footer>{_e(tr.t('cockpit.footer'))}</footer></main></body></html>\n"
+        f"<footer>{_e(tr.t('cockpit.footer'))}"
+        + (f"<br>{_e(tr.draft_notice())}" if tr.draft_notice() else "") + "</footer></main></body></html>\n"
     )

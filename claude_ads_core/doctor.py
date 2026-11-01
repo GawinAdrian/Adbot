@@ -12,6 +12,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Mapping, Sequence
@@ -125,6 +126,7 @@ def run_doctor(
         checks.append(Check("settings", "fail", "fail"))
 
     _merge_profile_env(directory / "env", env)
+    _merge_profile_env(Path(__file__).resolve().parents[1] / ".env", env)  # the scripts read this file too
     project = env.get("GOOGLE_PROJECT_ID") or env.get("GOOGLE_CLOUD_PROJECT")
     checks.append(Check("project", "ok" if project else "fail", "ok" if project else "fail"))
 
@@ -154,14 +156,16 @@ def run_doctor(
         if not script.is_file():
             checks.append(Check("api", "fail", "unknown"))
         else:
-            out = Path(env.get("TMPDIR", "/tmp")) / "adbot-doctor-probe.json"
-            code, text = runner(
-                ["uv", "run", "--no-project", "--with", "google-ads==35.0.0", str(script),
-                 "--customer", account, "--resource", "customer", "--fields", "customer.id",
-                 "--query-id", "doctor-probe-v1", "--out", str(out)],
-                env,
-            )
-            out.unlink(missing_ok=True)
+            with tempfile.TemporaryDirectory(prefix="adbot-doctor-") as scratch:  # private (0700) and removed afterwards
+                try:
+                    code, text = runner(
+                        ["uv", "run", "--no-project", "--with", "google-ads==35.0.0", str(script),
+                         "--customer", account, "--resource", "customer", "--fields", "customer.id",
+                         "--query-id", "doctor-probe-v1", "--out", str(Path(scratch) / "probe.json")],
+                        env,
+                    )
+                except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+                    code, text = 1, f"{type(exc).__name__}"
             checks.append(Check("api", "ok", "ok") if code == 0 else Check("api", "fail", classify_api_error(text)))
     return checks, context
 
@@ -185,6 +189,8 @@ def render_text(checks: Sequence[Check], tr: Translator) -> str:
     lines.append("")
     lines.append(tr.t("doctor.summary_fail", count=failures) if failures else tr.t("doctor.summary_ok"))
     lines.append(tr.t("doctor.connected") if is_connected(checks) else tr.t("doctor.not_connected"))
+    if tr.draft_notice():
+        lines.extend(("", tr.draft_notice()))
     return "\n".join(lines) + "\n"
 
 

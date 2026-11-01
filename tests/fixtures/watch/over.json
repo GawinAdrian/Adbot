@@ -185,7 +185,7 @@
       "campaign.name": "Beispiel Suche",
       "campaign.status": "ENABLED",
       "campaign_budget.amount_micros": "15000000",
-      "metrics.cost_micros": "25000000",
+      "metrics.cost_micros": "45000000",
       "metrics.clicks": "20",
       "metrics.impressions": "400",
       "metrics.conversions": 1.0

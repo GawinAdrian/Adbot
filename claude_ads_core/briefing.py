@@ -22,7 +22,7 @@ from .editor_export import (
 
 BRIEFING_FIELDS: tuple[str, ...] = (
     "goal", "goal_kind", "daily_budget", "currency", "region", "conversion_definition",
-    "offer", "website", "language", "confirmed_by_user", "confirmed_at",
+    "offer", "website", "language", "confirmed_by_user", "confirmation_quote", "confirmed_at",
 )
 GOAL_KINDS = ("calls", "leads", "sales")
 # Editor names for language and country; the Editor maps location text to targets on import,
@@ -44,8 +44,13 @@ def _nonempty(document: Mapping[str, Any], key: str) -> str:
     return value.strip()
 
 
-def validate_briefing(document: Any) -> dict[str, Any]:
-    """Validate a confirmed campaign briefing and return a normalized copy."""
+def validate_briefing(document: Any, *, account_currency: str | None = None) -> dict[str, Any]:
+    """Validate a confirmed campaign briefing and return a normalized copy.
+
+    ``confirmation_quote`` holds the user's own words of approval (not a model summary).  When the
+    account's currency is known, the briefing currency must match it: the Editor CSV carries no
+    currency, so a mismatch would silently change what the budget means.
+    """
     if not isinstance(document, Mapping):
         raise BriefingError("briefing must be an object")
     missing = [key for key in BRIEFING_FIELDS if key not in document]
@@ -56,6 +61,9 @@ def validate_briefing(document: Any) -> dict[str, Any]:
         raise BriefingError("briefing has unsupported field(s): " + ", ".join(extra))
     if document["confirmed_by_user"] is not True:
         raise BriefingError("briefing must be confirmed by the user before a draft is built")
+    quote = document["confirmation_quote"]
+    if not isinstance(quote, str) or len(quote.strip()) < 2:
+        raise BriefingError("confirmation_quote must contain the user's own words of approval")
     try:
         datetime.fromisoformat(str(document["confirmed_at"]).replace("Z", "+00:00"))
     except ValueError as exc:
@@ -68,6 +76,8 @@ def validate_briefing(document: Any) -> dict[str, Any]:
         raise BriefingError("language must be 'de' or 'pl'")
     if not isinstance(document["currency"], str) or not re.fullmatch(r"[A-Z]{3}", document["currency"]):
         raise BriefingError("currency must be a three-letter ISO code")
+    if account_currency is not None and document["currency"] != account_currency:
+        raise BriefingError(f"briefing currency {document['currency']} differs from the account currency {account_currency}")
     try:
         budget = Decimal(str(document["daily_budget"]))
     except InvalidOperation as exc:
@@ -77,7 +87,7 @@ def validate_briefing(document: Any) -> dict[str, Any]:
     if not re.fullmatch(r"https://[^\s/]+(/\S*)?", clean["website"]):
         raise BriefingError("website must be an https URL")
     clean.update(
-        goal_kind=document["goal_kind"], language=document["language"], currency=document["currency"],
+        goal_kind=document["goal_kind"], language=document["language"], currency=document["currency"], confirmation_quote=quote.strip(),
         daily_budget=format(budget.quantize(Decimal("0.01")), "f"), confirmed_by_user=True,
         confirmed_at=str(document["confirmed_at"]),
     )
@@ -93,9 +103,10 @@ def briefing_to_campaign(
     ads: Sequence[EditorResponsiveSearchAd],
     negatives: Sequence[EditorNegativeKeyword] = (),
     bid_strategy_type: str = "Maximize clicks",
+    account_currency: str | None = None,
 ) -> EditorCampaign:
     """Build a paused Search campaign draft from a confirmed briefing (validated again here)."""
-    checked = validate_briefing(briefing)
+    checked = validate_briefing(briefing, account_currency=account_currency)
     market = EDITOR_MARKETS[checked["language"]]
     return EditorCampaign(
         name=campaign_name,

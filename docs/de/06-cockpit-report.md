@@ -27,5 +27,5 @@ Die Wochenanalyse startest du selbst mit `/bericht`; der Wächter läuft täglic
 
 ## Wenn etwas nicht klappt
 
-- „Daten sind X Tage alt“: Rechner war aus oder Abruf fehlgeschlagen → Anleitung 08.
+- „Seit X Tagen keine frischen Daten“: Rechner war aus oder Abruf fehlgeschlagen → Anleitung 08.
 - Die Seite ist leer: Es gibt noch keinen Lauf; Anleitung 08, Abschnitt „Einmal von Hand starten“.

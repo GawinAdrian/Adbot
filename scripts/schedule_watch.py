@@ -3,7 +3,8 @@
 
 The job only runs ``scripts/run_daily_watch.py``: read-only pulls plus the deterministic watcher.
 Nothing is installed with ``--dry-run``.  ``--remove`` is idempotent.  If the computer is off at the
-scheduled time, the job runs at the next opportunity (launchd) or when you sign in (set in the task).
+scheduled time, the run is skipped; the next run covers the missing days (it pulls 14 days) and the cockpit
+reports the data gap.  No platform behaviour for missed runs is assumed.
 
   python scripts/schedule_watch.py --dry-run
   python scripts/schedule_watch.py --time 07:30
@@ -47,6 +48,8 @@ def launchd_plist(hour: int, minute: int, log_dir: Path) -> bytes:
         "StandardOutPath": str(log_dir / "watch.log"),
         "StandardErrorPath": str(log_dir / "watch.err.log"),
         "RunAtLoad": False,
+        # launchd starts jobs with a minimal PATH; uv usually lives in one of these folders.
+        "EnvironmentVariables": {"PATH": ":".join((str(Path.home() / ".local" / "bin"), "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"))},
     })
 
 

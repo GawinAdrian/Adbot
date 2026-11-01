@@ -10,7 +10,7 @@ Nutze das Glossar (`claude_ads_core.i18n.glossary()`) für Fachbegriffe und erkl
 
 Lies die Karte „Campaign“ in `ads/references/prozesskarten.md`, `docs/runbooks/editor-csv-import.md` und die Skills `ads-plan`, `ads-budget`, `ads-keywords`, `ads-copy`.
 
-1. **Briefing-Tor:** Ziel, Tagesbudget mit Währung, Region/Umkreis, Conversion-Definition, Angebot und Website erfragen und **von der Nutzerin bestätigen lassen**. Danach `claude_ads_core.briefing.validate_briefing` aufrufen; ohne Bestätigung kein Entwurf.
+1. **Briefing-Tor:** Ziel, Tagesbudget mit Währung, Region/Umkreis, Conversion-Definition, Angebot und Website erfragen und **von der Nutzerin bestätigen lassen**. Ihre Zustimmung **wörtlich** als `confirmation_quote` festhalten, die Kontowährung aus den gelesenen Daten als `account_currency` übergeben und `claude_ads_core.briefing.validate_briefing` aufrufen; ohne Bestätigung oder bei abweichender Währung kein Entwurf.
 2. Plan mit Szenarien statt Versprechen; Budget-Wirkung in Euro bzw. Złoty nennen. Keine Garantien.
 3. Keywords nach Suchabsicht, Anzeigen mit geprüften Zeichenlimits, Negative **nur** mit Suchbegriffsbericht und Overblocking-Prüfung.
 4. Entwurf mit `claude_ads_core.editor_export` erzeugen (`briefing_to_campaign` → `write_editor_csv`). Alle Kampagnen **pausiert**.

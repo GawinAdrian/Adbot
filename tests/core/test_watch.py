@@ -87,7 +87,7 @@ def test_disapproved_ads_are_critical_and_missing_policy_data_is_reported():
 def test_data_gap_is_a_warning_with_the_age():
     result = _result("healthy.json", as_of=date(2026, 11, 6), policy="policy-ok.json")
     gap = [c for c in result.checks if c.rule == "data"][0]
-    assert (gap.state, gap.params["days"], gap.params["newest"]) == ("gap", 4, "2026-11-02")
+    assert (gap.state, gap.params["days"], gap.params["newest"]) == ("gap", 4, "2026-11-01")
 
 
 def test_paused_campaigns_are_not_judged_and_all_unknown_is_grey():
@@ -129,7 +129,9 @@ def test_bundle_is_a_valid_monitoring_bundle(fixture):
     bundle = to_monitoring_bundle(result, run_id="watch-test", created_at=NOW, lifecycle=lifecycle, timezone_name="Europe/Berlin")
     validate_workflow_contract("monitoring-bundle", bundle)
     assert bundle["completeness"] == "partial"  # billing status is always a missing input
-    assert any(cp["status"] == "unknown" and not cp["evidence_refs"] for cp in bundle["checkpoints"]) or fixture != "small-numbers.json"
+    if fixture == "small-numbers.json":
+        assert any(cp["status"] == "unknown" and not cp["evidence_refs"] for cp in bundle["checkpoints"])
+    assert all(cp["evidence_refs"] for cp in bundle["checkpoints"] if cp["status"] != "unknown")
 
 
 def test_bundle_without_verified_encryption_is_refused_by_the_contract():
@@ -208,6 +210,86 @@ def test_numbers_inside_messages_use_the_language_format():
     de, _ = describe(drop, Translator("de"), "EUR")
     en, _ = describe(drop, Translator("en"), "EUR")
     assert "14.0" not in pl and "14.0" not in de and "14.0" not in en
-    assert "140 kliknięciach" in pl and "14" in pl
+    assert "liczba kliknięć: 140" in pl and "14" in pl
     assert "140 Klicks" in de
-    assert "2026-11-02" not in describe([c for c in result.checks if c.rule == "data"][0], Translator("de"), "EUR")[0] or True
+    data = [c for c in result.checks if c.rule == "data"][0]
+    assert "01.11.2026" in describe(data, Translator("de"), "EUR")[0]  # dates use the local format
+
+
+# ----------------------------------------------------- regressions from the independent review
+
+
+def test_campaign_that_went_quiet_long_ago_is_still_reported_as_stopped():
+    result = _result("dead-long.json", policy="policy-ok.json")
+    delivery = [c for c in result.checks if c.rule == "delivery"][0]
+    assert (delivery.state, delivery.status) == ("stopped", "critical")
+    assert result.ampel == "red"
+
+
+def test_a_brand_new_campaign_is_not_judged_on_spending():
+    result = _result("new-campaign.json", policy="policy-ok.json")
+    pacing = [c for c in result.checks if c.rule == "pacing"][0]
+    assert (pacing.state, pacing.status) == ("new", "unknown")
+
+
+def test_one_or_two_earlier_conversions_never_raise_a_red_alarm():
+    result = _result("thin-conversions.json", policy="policy-ok.json")
+    conv = [c for c in result.checks if c.rule == "conversions"][0]
+    assert (conv.state, conv.status) == ("thin", "unknown")
+    assert result.ampel != "red"
+
+
+def test_over_delivery_needs_a_large_excess():
+    from claude_ads_core import watch
+
+    assert watch.PACING_OVER_RATIO >= 2.0
+    assert ("pacing", "over") in _states(_result("over.json", policy="policy-ok.json"))
+    assert ("pacing", "over") not in _states(_result("capped.json", policy="policy-ok.json"))
+
+
+def test_data_gap_is_found_by_comparing_with_the_previous_run():
+    rows, meta = load_rows(FIXTURES / "healthy.json", "1234567890")
+    retrieved = datetime.fromisoformat(meta["retrieved_at"].replace("Z", "+00:00"))
+    quiet = evaluate(rows, as_of=AS_OF, currency="EUR", query_id="q", retrieved_at=retrieved, previous_run=date(2026, 10, 28))
+    gap = [c for c in quiet.checks if c.rule == "data"][0]
+    assert (gap.state, gap.params["days"]) == ("gap", 5)
+    fresh = evaluate(rows, as_of=AS_OF, currency="EUR", query_id="q", retrieved_at=retrieved, previous_run=date(2026, 11, 1))
+    assert [c for c in fresh.checks if c.rule == "data"][0].state == "normal"
+
+
+def test_run_watch_uses_the_previous_run_to_report_a_gap(tmp_path):
+    first = run_watch(FIXTURES / "healthy.json", "1234567890", as_of=date(2026, 10, 25), out_dir=tmp_path, now=datetime(2026, 10, 25, 6, tzinfo=timezone.utc))
+    assert first["ampel"] in {"green", "yellow"}
+    second = run_watch(FIXTURES / "healthy.json", "1234567890", as_of=AS_OF, out_dir=tmp_path, now=NOW)
+    data = json.loads(Path(second["result"]).read_text(encoding="utf-8"))["checks"][0]
+    assert data["rule"] == "data" and data["state"] == "gap"
+
+
+def test_empty_pull_gives_a_yellow_notice_not_a_failure():
+    from claude_ads_core.watch import empty_result
+
+    result = empty_result(as_of=AS_OF, currency="EUR", query_id="q", window_start=date(2026, 10, 19), window_end=date(2026, 11, 1))
+    assert result.ampel == "yellow" and result.checks[0].state == "empty" and result.checks[0].params["days"] == 14
+    for language in ("de", "pl", "en"):
+        text = render_watch_text(result.to_dict(), Translator(language))
+        assert "14" in text and "[en]" not in text
+
+
+def test_policy_envelope_for_another_account_is_rejected(tmp_path):
+    policy = json.loads((FIXTURES / "policy-ok.json").read_text(encoding="utf-8"))
+    policy["customer_id"] = "9999999999"
+    path = tmp_path / "other.json"
+    path.write_text(json.dumps(policy))
+    with pytest.raises(Exception, match="customer"):
+        run_watch(FIXTURES / "healthy.json", "1234567890", as_of=AS_OF, out_dir=tmp_path / "r", policy_envelope=path, now=NOW)
+
+
+def test_results_are_written_private(tmp_path):
+    import os
+    import stat
+
+    result = run_watch(FIXTURES / "healthy.json", "1234567890", as_of=AS_OF, out_dir=tmp_path / "runs", attested_on="2026-11-01", now=NOW)
+    if os.name == "posix":
+        for key in ("result", "bundle"):
+            assert stat.S_IMODE(Path(result[key]).stat().st_mode) == 0o600
+        assert stat.S_IMODE(Path(result["result"]).parent.stat().st_mode) == 0o700

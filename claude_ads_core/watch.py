@@ -14,12 +14,13 @@ Principles (see ``ads/references/kadenz-und-regeln.md``):
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from .adapters.google_live import GoogleAdsLiveReadAdapter, flatten_gaql_row
+from .adapters.google_live import GoogleAdsLiveReadAdapter
 from .i18n import Translator
 from .workflow_contracts import validate_workflow_contract
 
@@ -27,10 +28,11 @@ from .workflow_contracts import validate_workflow_contract
 PACING_WINDOW_DAYS = 3          # consecutive recent days used for pacing and delivery
 PACING_CAPPED_RATIO = 0.90      # cost >= 90 % of the daily budget on every recent day: budget-limited
 PACING_UNDER_RATIO = 0.20       # cost <= 20 % of the daily budget on every recent day: delivers very little
-PACING_OVER_RATIO = 1.50        # one day above 150 % of the daily budget: unusually high
+PACING_OVER_RATIO = 2.50        # one day above 250 % of the daily budget: unusually high (no platform limit is claimed)
 CONVERSION_WINDOW_DAYS = 7      # compare the last 7 days with the 7 days before
 MIN_CLICKS_FOR_CONVERSION_RULES = 30
 MIN_CLICKS_FOR_NO_CONVERSION = 50
+MIN_PREVIOUS_CONVERSIONS_FOR_DROP = 3  # fewer conversions before: a "drop" could be chance
 DATA_GAP_DAYS = 2               # newest data older than this many days is a data gap
 STATUS_RANK = {"normal": 0, "unknown": 1, "warning": 2, "critical": 3}
 REQUIRED_FIELDS = (
@@ -139,6 +141,9 @@ def _period(rows: Sequence[Mapping[str, str]], start: date, end: date) -> dict[s
 
 def _pacing(campaign_rows: Sequence[Mapping[str, str]], last: date, budget: float) -> tuple[str, str, dict[str, Any]]:
     days = [last - timedelta(days=offset) for offset in range(PACING_WINDOW_DAYS)]
+    first_day = min(date.fromisoformat(row["segments.date"]) for row in campaign_rows)
+    if first_day > days[-1]:  # the campaign has fewer days of data than the window: days before launch are not "zero spend"
+        return "unknown", "new", {"days": PACING_WINDOW_DAYS}
     costs = [_day_sum(campaign_rows, "metrics.cost_micros", day, day) / 1_000_000 for day in days]
     params = {"budget": round(budget, 2), "days": PACING_WINDOW_DAYS, "max_cost": round(max(costs), 2)}
     if budget <= 0:
@@ -155,7 +160,7 @@ def _pacing(campaign_rows: Sequence[Mapping[str, str]], last: date, budget: floa
 def _delivery(campaign_rows: Sequence[Mapping[str, str]], last: date) -> tuple[str, str, dict[str, Any]]:
     recent_start = last - timedelta(days=PACING_WINDOW_DAYS - 1)
     recent = _day_sum(campaign_rows, "metrics.impressions", recent_start, last)
-    earlier = _day_sum(campaign_rows, "metrics.impressions", last - timedelta(days=9), recent_start - timedelta(days=1))
+    earlier = _day_sum(campaign_rows, "metrics.impressions", date.min, recent_start - timedelta(days=1))
     params = {"days": PACING_WINDOW_DAYS}
     if recent == 0 and earlier > 0:
         return "critical", "stopped", params
@@ -172,8 +177,10 @@ def _conversions(campaign_rows: Sequence[Mapping[str, str]], last: date) -> tupl
     params = {"clicks": int(clicks), "days": span, "previous": round(prev_conv, 2)}
     if clicks < MIN_CLICKS_FOR_CONVERSION_RULES:
         return "unknown", "insufficient", {**params, "minimum": MIN_CLICKS_FOR_CONVERSION_RULES}
-    if conv == 0 and prev_conv >= 1:
+    if conv == 0 and prev_conv >= MIN_PREVIOUS_CONVERSIONS_FOR_DROP:
         return "critical", "drop", params
+    if conv == 0 and prev_conv > 0:
+        return "unknown", "thin", params
     if conv == 0 and prev_conv == 0 and clicks >= MIN_CLICKS_FOR_NO_CONVERSION:
         return "warning", "none", params
     return "normal", "normal", params
@@ -187,6 +194,7 @@ def evaluate(
     query_id: str,
     retrieved_at: datetime,
     policy_rows: Sequence[Mapping[str, str]] | None = None,
+    previous_run: date | None = None,
 ) -> WatchResult:
     """Apply all rules to *rows* (flattened GAQL rows) and return the result.
 
@@ -202,9 +210,11 @@ def evaluate(
     last = pulled - timedelta(days=1)
     if last < first:
         raise WatchError("the data was retrieved before its own first day; check the stored envelope")
-    gap_days = (as_of - pulled).days
+    stale_days = (as_of - pulled).days
+    silent_days = (pulled - previous_run).days if previous_run else 0  # days since the last successful run
+    gap_days = max(stale_days, silent_days)
     if gap_days > DATA_GAP_DAYS:
-        checks.append(WatchCheck("data", "gap", "warning", params={"days": gap_days, "newest": pulled.isoformat()}))
+        checks.append(WatchCheck("data", "gap", "warning", params={"days": gap_days, "newest": last.isoformat()}))
     else:
         checks.append(WatchCheck("data", "normal", "normal", params={"newest": last.isoformat()}))
 
@@ -245,6 +255,16 @@ def evaluate(
     }
     return WatchResult(ampel, tuple(checks), first.isoformat(), last.isoformat(), as_of.isoformat(), currency,
                        tuple(missing), query_id, summary)
+
+
+def empty_result(*, as_of: date, currency: str, query_id: str, window_start: date, window_end: date) -> WatchResult:
+    """Result for a pull that returned no rows: nothing was shown in the whole window (or no campaign exists).
+
+    This is a yellow notice, never green and never a silent failure.
+    """
+    check = WatchCheck("data", "empty", "warning", params={"days": (window_end - window_start).days + 1})
+    return WatchResult("yellow", (check,), window_start.isoformat(), window_end.isoformat(), as_of.isoformat(), currency,
+                       ("billing and payment status",), query_id, {})
 
 
 def describe(check: WatchCheck, tr: Translator, currency: str) -> tuple[str, str | None]:
@@ -352,25 +372,61 @@ def run_watch(
         policy, _ = _load_policy(policy_envelope, customer_id)
     currency = rows[0]["customer.currency_code"]
     retrieved = datetime.fromisoformat(str(meta["retrieved_at"]).replace("Z", "+00:00"))
-    result = evaluate(rows, as_of=as_of, currency=currency, query_id=meta["query_id"], retrieved_at=retrieved, policy_rows=policy)
+    result = evaluate(rows, as_of=as_of, currency=currency, query_id=meta["query_id"], retrieved_at=retrieved, policy_rows=policy,
+                      previous_run=previous_run_date(out_dir))
+    return store_result(result, out_dir=out_dir, attested_on=attested_on, timezone_name=timezone_name, now=now)
+
+
+def store_result(
+    result: WatchResult,
+    *,
+    out_dir: str | Path,
+    attested_on: str | None,
+    timezone_name: str,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Write *result* (and the bundle when encryption is attested) into a new private run directory."""
     stamp = (now or datetime.now(timezone.utc)).astimezone(timezone.utc).replace(microsecond=0)
     run_id = f"watch-{stamp:%Y%m%d-%H%M%S}"
     target = Path(out_dir) / run_id
-    target.mkdir(parents=True, exist_ok=False)  # never overwrite an earlier run
+    target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    target.mkdir(exist_ok=False, mode=0o700)  # never overwrite an earlier run
     written = {"result": str(target / "watch-result.json")}
-    (target / "watch-result.json").write_text(json.dumps(result.to_dict(), indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+    _write_private(target / "watch-result.json", json.dumps(result.to_dict(), indent=2, sort_keys=True, ensure_ascii=False) + "\n")
     if attested_on:
         bundle = to_monitoring_bundle(result, run_id=run_id, created_at=stamp,
                                       lifecycle=attested_lifecycle(attested_on, run_id, stamp), timezone_name=timezone_name)
-        (target / "monitoring-bundle.json").write_text(json.dumps(bundle, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
+        _write_private(target / "monitoring-bundle.json", json.dumps(bundle, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
         written["bundle"] = str(target / "monitoring-bundle.json")
     return {"run_id": run_id, "ampel": result.ampel, **written, "bundle_written": bool(attested_on)}
+
+
+def _write_private(path: Path, text: str) -> None:
+    """Write *text* readable by the owner only; results contain campaign names and spend."""
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+def previous_run_date(out_dir: str | Path) -> date | None:
+    """Date of the newest earlier run (its ``as_of``), or None when there is none."""
+    newest: date | None = None
+    root = Path(out_dir)
+    if not root.is_dir():
+        return None
+    for candidate in sorted(root.glob("watch-*/watch-result.json")):
+        try:
+            stamp = date.fromisoformat(json.loads(candidate.read_text(encoding="utf-8"))["as_of"])
+        except (OSError, ValueError, KeyError, json.JSONDecodeError):
+            continue
+        newest = stamp if newest is None or stamp > newest else newest
+    return newest
 
 
 def _load_policy(path: str | Path, customer_id: str) -> tuple[list[dict[str, str]], dict[str, Any]]:
     adapter = GoogleAdsLiveReadAdapter(customer_id)
     envelope = adapter._load_envelope(Path(path))  # noqa: SLF001
-    return [flatten_gaql_row(row) for row in envelope["rows"]], envelope
+    return [adapter._flatten_checked(row, index) for index, row in enumerate(envelope["rows"])], envelope  # noqa: SLF001
 
 
 def render_watch_text(result: Mapping[str, Any], tr: Translator) -> str:
@@ -386,4 +442,6 @@ def render_watch_text(result: Mapping[str, Any], tr: Translator) -> str:
     for missing in result["missing_inputs"]:
         key = {"ad policy status": "watch.missing.policy", "billing and payment status": "watch.missing.billing"}.get(missing)
         lines.append(f"[{tr.label('check_status', 'unknown')}] {tr.t(key) if key else missing}")
+    if tr.draft_notice():
+        lines.extend(("", tr.draft_notice()))
     return "\n".join(lines) + "\n"

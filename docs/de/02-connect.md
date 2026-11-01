@@ -43,6 +43,8 @@ Ein Developer-Token brauchst du **nicht** mehr: Google hat sie am 9. September 2
 einmal pro Woche neu anmelden (Schritt 5 wiederholen). Auf **„In Produktion“** stellen ist möglich, kann aber nach Google-Angaben eine App-Prüfung verlangen.
 Für den Anfang ist „Testing“ in Ordnung.
 
+**Gut zu wissen:** Der Bereich `adwords` erlaubt aus Googles Sicht auch Änderungen am Konto; auf den gelesenen Google-Seiten wird kein reiner Lese-Bereich genannt. Dass Adbot nur liest, stellt Adbot selbst sicher (kein Schreibaufruf im Code, durch Tests abgesichert) – nicht die Anmeldung.
+
 ## Schritt 4 · OAuth-Client (Desktop-App) erstellen
 
 1. **APIs & Dienste** → **Anmeldedaten** → **Anmeldedaten erstellen** → **OAuth-Client-ID**.

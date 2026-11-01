@@ -109,7 +109,7 @@ MESSAGES = {'report.title': 'Claude Ads Audit Report',
  'watch.ampel.red': 'Red: act soon.',
  'watch.ampel.unknown': 'Grey: not enough data to judge.',
  'watch.data.normal': 'The newest data is from {newest}.',
- 'watch.data.gap': 'The newest data is {days} days old (from {newest}).',
+ 'watch.data.gap': 'No fresh data for {days} days (newest complete day: {newest}).',
  'watch.data.gap.hint': 'Run the data pull again; check the computer was on and signed in.',
  'watch.campaigns.none_enabled': 'No active campaign was found in the data.',
  'watch.campaigns.none_enabled.hint': 'If a campaign should be running, check its status in Google '
@@ -187,4 +187,12 @@ MESSAGES = {'report.title': 'Claude Ads Audit Report',
  'cockpit.footer': 'This page is a local file. Opening it sends no data anywhere.',
  'cockpit.change.before': 'Before',
  'cockpit.change.after': 'After',
- 'cockpit.status.pending': 'pending'}
+ 'cockpit.status.pending': 'pending',
+ 'watch.data.empty': 'No ad was shown and no data exists for the last {days} days.',
+ 'watch.data.empty.hint': 'If a campaign should be running, check its status, budget, and payment '
+                          'in Google Ads; with no campaign yet, this is expected.',
+ 'watch.pacing.new': '{campaign}: too new to judge spending (less than {days} days of data).',
+ 'watch.pacing.new.hint': 'Wait a few days before judging the spending.',
+ 'watch.conversions.thin': '{campaign}: no conversions in the last {days} days, but only '
+                           '{previous} in the {days} days before; too few to call it a drop.',
+ 'watch.conversions.thin.hint': 'Wait for more data before changing anything.'}

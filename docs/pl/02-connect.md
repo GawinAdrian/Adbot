@@ -44,6 +44,8 @@ udzielasz **Ty sam(a)** w Google. Każda użytkowniczka ma **własny projekt Goo
 ponownie (powtórz krok 5). Można przełączyć na **„In production”**, ale według Google może to wymagać weryfikacji aplikacji.
 Na początek wystarczy „Testing”.
 
+**Warto wiedzieć:** Zakres `adwords` z punktu widzenia Google pozwala także zmieniać konto; na przeczytanych stronach Google nie wymieniono zakresu wyłącznie do odczytu. To, że Adbot tylko odczytuje, zapewnia sam Adbot (brak wywołań zapisu w kodzie, zabezpieczone testami) – nie samo logowanie.
+
 ## Krok 4 · Utwórz klienta OAuth (aplikacja komputerowa)
 
 1. **Interfejsy API i usługi** → **Dane logowania** → **Utwórz dane logowania** → **Identyfikator klienta OAuth**.

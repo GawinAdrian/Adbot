@@ -11,7 +11,7 @@ Zuerst immer: `python -m claude_ads_core doctor --lang de --online`
 | Python … ist zu alt | Version unter 3.11 | Neuere Version installieren (Anleitung 01) |
 | Werkzeug uv / Google-Cloud-Werkzeug fehlt | Hinweis, nicht kritisch | Installieren, wenn du direkt Daten abrufen bzw. dich verbinden willst |
 | Keine gültigen Einstellungen | `/start` noch nicht gelaufen | `/start` oder `python -m claude_ads_core settings init --lang de` |
-| Projekt-ID nicht eingetragen | Datei `env` im Profil fehlt | Anleitung 02, Schritt 6 |
+| Google-Cloud-Projekt-ID nicht eingetragen | Datei `env` im Profil fehlt | Anleitung 02, Schritt 6 |
 | Keine Google-Anmeldung gefunden | nicht verbunden | Anleitung 02, Schritt 5 |
 | Anmeldedatei nicht lesbar/unvollständig | beschädigt | Trennen (03), dann neu verbinden (02) |
 | Anmeldung abgelaufen oder widerrufen | z. B. 7-Tage-Regel im Testmodus | Anleitung 02, Schritt 5 wiederholen |

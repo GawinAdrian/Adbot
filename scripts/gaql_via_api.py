@@ -36,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import adbot_env  # noqa: E402  (sibling module, path set above)
 
 ROOT = Path(__file__).resolve().parents[1]
+NO_ROWS_EXIT_CODE = 3
 _API_VERSION = re.compile(r"^v[0-9]{1,3}$")
 _RESOURCE = re.compile(r"^[a-z][a-z0-9_]*$")
 _FIELD = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$")
@@ -157,7 +158,10 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("could not determine the API version; pass --api-version (e.g. v26)")
 
     customer_id = _digits(args.customer, "--customer")
-    login_id = _digits(args.login_customer_id, "--login-customer-id") if args.login_customer_id else None
+    try:
+        login_id = adbot_env.resolve_login_customer_id(args.login_customer_id, os.environ)
+    except adbot_env.CredentialsError as exc:
+        raise SystemExit(str(exc))
     client = GoogleAdsClient.load_from_dict(adbot_env.build_client_config(os.environ, login_id))
     service = client.get_service("GoogleAdsService", version=api_version)
 
@@ -166,7 +170,9 @@ def main(argv: list[str] | None = None) -> int:
         for result in batch.results:
             rows.append(extract_row(result, args.fields))
     if not rows:
-        raise SystemExit("the API returned no rows; treat this as needs_input, not a dataset")
+        # Exit code 3 lets the daily job tell "nothing was shown" apart from a real failure.
+        print("the API returned no rows; treat this as needs_input, not a dataset", file=sys.stderr)
+        return NO_ROWS_EXIT_CODE
 
     now = datetime.now(timezone.utc).replace(microsecond=0)
     envelope = {
@@ -181,8 +187,11 @@ def main(argv: list[str] | None = None) -> int:
         "rows": rows,
     }
     out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(envelope, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    out.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    descriptor = os.open(out, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)  # campaign names and spend: owner only
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        handle.write(json.dumps(envelope, indent=2, ensure_ascii=False) + "\n")
+    os.chmod(out, 0o600)
     print(json.dumps({"query_id": args.query_id, "customer_id": customer_id, "api_version": api_version,
                       "rows": len(rows), "out": str(out)}))
     return 0

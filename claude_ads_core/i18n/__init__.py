@@ -115,6 +115,12 @@ class Translator:
             return MISSING_MARKER + self._reference[key]
         return text.replace("_", " ").title()
 
+    def draft_notice(self) -> str | None:
+        """Visible hint when this language's catalog has not been reviewed by a native speaker."""
+        if catalog_meta(self.language).get("review_status") == "entwurf":
+            return self.t("common.draft_notice")
+        return None
+
     # ------------------------------------------------------------------ numbers
     def number(self, value: float, decimals: int = 2) -> str:
         """Format *value* with the language's decimal and thousands separators."""
@@ -129,7 +135,7 @@ class Translator:
     def percent(self, value: float, decimals: int = 2) -> str:
         """Format a percentage that is already expressed in percent (12.5 -> 12.5%)."""
         text = self.number(value, decimals)
-        return f"{text} %" if self.language == "de" else f"{text}%"
+        return f"{text}{_NBSP}%" if self.language == "de" else f"{text}%"
 
     def score(self, value: float | None) -> str:
         """Format a 0-100 score, or the localized 'not scored' text."""
@@ -144,7 +150,8 @@ class Translator:
         symbol = _CURRENCY_SYMBOLS.get(currency, currency)
         number = self.number(amount, 2)
         if self.language == "en":
-            return f"{symbol}{number}" if currency in _CURRENCY_SYMBOLS else f"{currency} {number}"
+            sign, digits = ("-", number[1:]) if number.startswith("-") else ("", number)
+            return f"{sign}{symbol}{digits}" if currency in _CURRENCY_SYMBOLS else f"{sign}{currency} {digits}"
         return f"{number}{_NBSP}{symbol}"
 
     def date(self, value: str | date) -> str:

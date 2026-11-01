@@ -5,7 +5,7 @@
 **Stan na:** 2026-11-01
 
 **Co robi:** Codziennie skrypt odczytuje (tylko do odczytu) ostatnie 14 dni i sprawdza: zużycie budżetu, czy reklamy nadal działają, konwersje, odrzucone reklamy, wiek danych.
-**Bez AI i bez kosztów.** Wynikiem jest sygnalizator w kokpicie. Reguły i progi: `ads/references/kadenz-und-regeln.md`.
+**Bez AI i bez kosztów.** Dzienny przebieg buduje potem także kokpit (`cockpit.html`); sygnalizator jest u góry. Reguły i progi: `ads/references/kadenz-und-regeln.md`.
 
 ## Wymagania
 
@@ -29,7 +29,7 @@ python scripts/schedule_watch.py --remove       # usunięcie (można wykonać wi
 
 Mac: zadanie w tle (launchd) dla Twojego użytkownika. Windows: zaplanowane zadanie „AdbotWatch”. Dzienniki (Mac): `~/.config/adbot/logs`.
 
-**Gdy komputer o tej porze jest wyłączony:** kolejny przebieg uzupełni brakujące dni; do tego czasu kokpit pokazuje „Dane mają X dni”.
+**Gdy komputer o tej porze jest wyłączony:** kolejny przebieg uzupełni brakujące dni; do tego czasu kokpit pokazuje „Od X dni brak świeżych danych”.
 Wyłączenie bez usuwania: `python -m claude_ads_core settings set --watch off`.
 
 ## Czego strażnik nigdy nie robi

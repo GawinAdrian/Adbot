@@ -43,4 +43,7 @@ if [ "${ADBOT_DRY_RUN:-0}" = "1" ]; then
   echo "google_ads_mcp: configuration ok (dry run)"
   exit 0
 fi
+# NOTE: this runs whatever is at the head of the upstream repository on the day it starts. The "read-only"
+# statement (CLM-0210, CLM-0219) is a statement about that server at the date it was checked; pin a reviewed
+# tag or commit here (git+https://...@<ref>) before relying on it for anything beyond reading.
 exec pipx run --spec git+https://github.com/googleads/google-ads-mcp.git google-ads-mcp "$@"

@@ -3,7 +3,7 @@
 **Stand:** 2026-11-01
 
 **Was er tut:** Jeden Tag liest ein Skript lesend die letzten 14 Tage und prüft: Budgetverbrauch, ob Anzeigen noch laufen, Conversions, abgelehnte Anzeigen, Alter der Daten.
-**Ohne KI und ohne Kosten.** Das Ergebnis ist die Ampel im Cockpit. Regeln und Schwellen: `ads/references/kadenz-und-regeln.md`.
+**Ohne KI und ohne Kosten.** Der Tageslauf baut danach auch das Cockpit (`cockpit.html`) neu; die Ampel steht dort oben. Regeln und Schwellen: `ads/references/kadenz-und-regeln.md`.
 
 ## Voraussetzungen
 
@@ -27,7 +27,7 @@ python scripts/schedule_watch.py --remove       # wieder entfernen (mehrfach aus
 
 Mac: ein Hintergrundauftrag (launchd) für deinen Benutzer. Windows: eine geplante Aufgabe „AdbotWatch“. Protokolle (Mac): `~/.config/adbot/logs`.
 
-**Wenn der Rechner um die Zeit aus ist:** Der nächste Lauf holt die fehlenden Tage nach; das Cockpit zeigt bis dahin „Daten sind X Tage alt“.
+**Wenn der Rechner um die Zeit aus ist:** Der nächste Lauf holt die fehlenden Tage nach; das Cockpit zeigt bis dahin „Seit X Tagen keine frischen Daten“.
 Ausschalten ohne Entfernen: `python -m claude_ads_core settings set --watch off`.
 
 ## Was der Wächter nie tut

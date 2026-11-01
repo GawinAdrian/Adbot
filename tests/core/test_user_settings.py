@@ -146,3 +146,12 @@ def test_cli_settings_set_rejects_a_malformed_account_id(tmp_path, capsys):
     capsys.readouterr()
     assert main(["settings", "set", *base, "--account", "12345"]) == 2
     assert "invalid settings" in capsys.readouterr().err
+
+
+def test_a_future_disk_encryption_date_is_refused():
+    settings = default_settings("de", FIXED)
+    settings["disk_encryption_attested_on"] = "2099-01-01"
+    with pytest.raises(SettingsError, match="future"):
+        validate_settings(settings)
+    settings["disk_encryption_attested_on"] = "2026-11-01"
+    assert validate_settings(settings)
