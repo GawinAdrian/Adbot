@@ -2,31 +2,30 @@
 
 Retrieved: 2026-11-01 · Refresh due: 2026-12-01
 
-## Language constants (confirmed)
+## Language and geo constants (confirmed by live API, 2026-11-01)
 
-Source: Google Ads API "Codes and formats" (language table).
+Source: read-only GAQL on `language_constant` and `geo_target_constant` (API v26) through
+`scripts/gaql_via_api.py`; ledger claim CLM-0222. Re-check with the same queries when the
+API version changes.
 
-| Language | Code | Criterion ID | Resource name |
+| Item | Code | ID | Resource name |
 |---|---|---|---|
-| German | `de` | 1001 | `languageConstants/1001` |
-| Polish | `pl` | 1030 | `languageConstants/1030` |
+| German (language) | `de` | 1001 | `languageConstants/1001` |
+| Polish (language) | `pl` | 1030 | `languageConstants/1030` |
+| Germany (country) | `DE` | 2276 | `geoTargetConstants/2276` |
+| Poland (country) | `PL` | 2616 | `geoTargetConstants/2616` |
 
-## Geo target constants (not confirmed from documentation)
-
-The country rows could not be read from the documentation page in this refresh. The repository
-used `2276` (Germany) in an earlier keyword run, but that is **not** a documentation check.
-`2616` for Poland is **unconfirmed** and must not be shown to users as fact.
-
-Resolve at runtime with a read-only query and store the result with date and API version:
+Re-check queries:
 
 ```sql
+SELECT language_constant.id, language_constant.code, language_constant.name
+FROM language_constant WHERE language_constant.code IN ('de', 'pl')
+
 SELECT geo_target_constant.id, geo_target_constant.name, geo_target_constant.country_code,
        geo_target_constant.target_type
 FROM geo_target_constant
 WHERE geo_target_constant.country_code IN ('DE', 'PL') AND geo_target_constant.target_type = 'Country'
 ```
-
-(Verify the field names against the current API version before use.)
 
 ## Currency and time zone
 

@@ -24,11 +24,14 @@ Pass `--login-customer-id` only for accounts reached through a manager (MCC)
 link. For directly accessible accounts, omit it or pass the customer ID itself;
 a manager header for an unlinked account fails with a permission error.
 
-**Access level:** GAQL reads work with Explorer access, but
-`GenerateKeywordIdeas` requires the developer token to hold **Basic or Standard
-access** (live error 2026-09-01: "This method is not allowed for use with
-explorer access"). Apply in the Google Ads API Center of the token's manager
-account before relying on this surface.
+**Access level (as of 2026-11-01):** Developer tokens were sunset on 2026-09-09; the access
+level now belongs to the **Google Cloud project** that issued the OAuth credentials (CLM-0214).
+GAQL reads work with Explorer access, but the planning services, including
+`GenerateKeywordIdeas`, are **not available with Explorer access** (CLM-0217) and need
+**Basic or Standard** access on the project (Basic requires brand verification, CLM-0216).
+Live error before the sunset, 2026-09-01: "This method is not allowed for use with explorer
+access". Without Basic access, use the Keyword Planner export (CSV) as the fallback source.
+The script runs without a developer token; the client library is pinned to `google-ads==35.0.0`.
 
 Normalize and validate the stored envelope with
 `claude_ads_core.adapters.GoogleKeywordIdeasAdapter.read_ideas(...)`; the result

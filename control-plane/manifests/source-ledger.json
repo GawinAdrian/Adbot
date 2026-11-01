@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-07-11",
+  "generated_at": "2026-11-01",
   "sources": [
     {
       "id": "claude-ads-v181-tree",
@@ -662,7 +662,7 @@
       "confidence": "high",
       "license": "Apache-2.0",
       "redistribution": "metadata-only",
-      "claim_ids": ["CLM-0111", "CLM-0210"]
+      "claim_ids": ["CLM-0111", "CLM-0210", "CLM-0219"]
     },
     {
       "id": "amazon-ads-mcp-official",
@@ -865,6 +865,136 @@
       "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
       "redistribution": "metadata-only",
       "claim_ids": ["CLM-0213"]
+    },
+    {
+      "id": "google-ads-developer-token-policy-official",
+      "title": "Google Ads API: Developer token (sunset and access levels per Cloud project)",
+      "locator": "https://developers.google.com/google-ads/api/docs/api-policy/developer-token",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0214",
+        "CLM-0215"
+      ],
+      "notes": "Page last updated 2026-10-30 UTC."
+    },
+    {
+      "id": "google-ads-access-levels-official",
+      "title": "Google Ads API: Access levels and permissible use",
+      "locator": "https://developers.google.com/google-ads/api/docs/api-policy/access-levels",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0216",
+        "CLM-0217",
+        "CLM-0218"
+      ],
+      "notes": "Page last updated 2026-10-30 UTC."
+    },
+    {
+      "id": "google-ads-mcp-server-guide-official",
+      "title": "Google Ads MCP server: Developer integration guide",
+      "locator": "https://developers.google.com/google-ads/api/docs/developer-toolkit/mcp-server",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0219"
+      ],
+      "notes": "Page last updated 2026-10-30 UTC."
+    },
+    {
+      "id": "google-oauth2-protocols-official",
+      "title": "Using OAuth 2.0 to access Google APIs (refresh token expiration)",
+      "locator": "https://developers.google.com/identity/protocols/oauth2",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0220"
+      ],
+      "notes": "Page last updated 2026-10-29 UTC."
+    },
+    {
+      "id": "google-ads-oauth-overview-official",
+      "title": "Google Ads API: OAuth overview",
+      "locator": "https://developers.google.com/google-ads/api/docs/oauth/overview",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0221"
+      ],
+      "notes": "Page last updated 2026-10-30 UTC. Still states a developer token is required; contradicts the developer-token and MCP pages (see CLM-0215)."
+    },
+    {
+      "id": "google-ads-codes-formats-official",
+      "title": "Google Ads API: Codes and formats (language codes)",
+      "locator": "https://developers.google.com/google-ads/api/data/codes-formats",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "medium",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0222"
+      ],
+      "notes": "Secondary source for CLM-0222; the table body could not be read through the fetch tool, values were confirmed by live API queries instead."
+    },
+    {
+      "id": "pypi-google-ads-client",
+      "title": "PyPI: google-ads client library release history",
+      "locator": "https://pypi.org/project/google-ads/",
+      "source_type": "third-party",
+      "authority_tier": 3,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "medium",
+      "license": "Package registry metadata; citation only",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0223"
+      ],
+      "notes": "Release dates 32.0.0: 2026-09-09; 35.0.0: 2026-10-29."
+    },
+    {
+      "id": "google-ads-language-geo-constants-official",
+      "title": "Google Ads API: LanguageConstant and GeoTargetConstant resources (v26)",
+      "locator": "https://developers.google.com/google-ads/api/reference/rpc/v26/LanguageConstant",
+      "source_type": "api-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "version": "v26",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": ["CLM-0222"],
+      "notes": "Values confirmed by read-only GAQL queries against the live API (v26) on 2026-11-01."
     }
   ]
 }
