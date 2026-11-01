@@ -1,11 +1,11 @@
-# Claude Ads Agent Instructions
+# Adbot Agent Instructions
 
 `ads/SKILL.md` is the product entrypoint. This file defines repository-level
 rules for agent runtimes that support `AGENTS.md`.
 
 ## Read order
 
-1. `ads/SKILL.md`
+1. `ads/SKILL.md` and `skills/ads-assistent/SKILL.md`
 2. `control-plane/README.md`
 3. `control-plane/PRODUCT_BOUNDARIES.md`
 4. `control-plane/PUBLISHING_POLICY.md`
@@ -33,6 +33,14 @@ rules for agent runtimes that support `AGENTS.md`.
   context.
 - Preserve unrelated user changes. Use focused commits and verify before
   claiming completion.
+
+## Adbot specifics
+
+- Users are small-business owners, not specialists: German and Polish, step-by-step guides, plain-language explanations.
+- Each user works with her own Google account and her own Google Cloud project; never provide or ask for a shared sign-in.
+- Developer tokens were sunset on 2026-09-09 and are optional; never require one.
+- Language: answer in the user's settings language; German with real umlauts, Polish with diacritics; Polish stays a draft until a native reviewer approves it.
+- This version is read-only toward the account. Campaigns are produced only as paused Google Ads Editor drafts that the user imports herself.
 
 ## Portable execution
 
