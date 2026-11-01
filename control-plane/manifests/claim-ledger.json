@@ -538,8 +538,8 @@
       "verdict": "verified",
       "source_ids": ["google-ads-mcp-official"],
       "load_bearing": true,
-      "last_verified": "2026-08-27",
-      "refresh_due": "2026-09-26",
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
       "owner": "adbot-maintainers"
     },
     {
@@ -721,7 +721,7 @@
     },
     {
       "id": "CLM-0224",
-      "statement": "For user authentication with the Google Ads API the OAuth consent screen needs the scope https://www.googleapis.com/auth/adwords, the OAuth client may be of type Desktop app or Web application, and a consent screen in Testing status is limited to the test users that were added.",
+      "statement": "For user authentication with the Google Ads API the OAuth consent screen needs the scope https://www.googleapis.com/auth/adwords, the OAuth client may be of type Desktop app or Web application, a consent screen in Testing status is limited to the test users that were added, and in production status the audience follows the user type, which might require app verification by Google.",
       "scope": "Official Google Ads API Cloud-project page at retrieval date; the page gives no steps for adding test users and nothing about token expiry (see CLM-0220).",
       "classification": "evidence-based",
       "verdict": "verified",
@@ -741,6 +741,35 @@
       "verdict": "verified",
       "source_ids": [
         "gcloud-adc-revoke-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0226",
+      "statement": "A Google Cloud project starts with Test access to the Google Ads API; the user applies for Explorer access, and Google usually upgrades such applications automatically.",
+      "scope": "Official Cloud-project page at retrieval date (service-account path); the exact place of the application in the current interface was not checked.",
+      "classification": "evidence-based",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-cloud-project-official"
+      ],
+      "load_bearing": true,
+      "last_verified": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "owner": "adbot-maintainers"
+    },
+    {
+      "id": "CLM-0227",
+      "statement": "The GAQL field ad_group_ad.policy_summary.approval_status exists in Google Ads API v26 and its enum PolicyApprovalStatus has the members APPROVED, APPROVED_LIMITED, AREA_OF_INTEREST_ONLY, DISAPPROVED, UNKNOWN and UNSPECIFIED.",
+      "scope": "A read-only query with this field was accepted by the live API v26 on 2026-11-01 (a test account without active ads returned no rows); enum members read from google-ads 35.0.0. Not yet observed on a real disapproved ad.",
+      "classification": "practitioner",
+      "verdict": "verified",
+      "source_ids": [
+        "google-ads-policy-summary-reference",
+        "pypi-google-ads-client"
       ],
       "load_bearing": true,
       "last_verified": "2026-11-01",

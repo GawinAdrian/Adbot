@@ -144,7 +144,10 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     customer_id = _digits(args.customer, "--customer")
-    login_customer_id = _digits(args.login_customer_id, "--login-customer-id") if args.login_customer_id else None
+    try:
+        login_customer_id = adbot_env.resolve_login_customer_id(args.login_customer_id, os.environ)
+    except adbot_env.CredentialsError as exc:
+        raise SystemExit(str(exc))
     config = adbot_env.build_client_config(os.environ, login_customer_id)
     client = GoogleAdsClient.load_from_dict(config)
 

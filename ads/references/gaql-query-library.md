@@ -115,3 +115,16 @@ WHERE segments.date DURING LAST_30_DAYS AND ad_group_criterion.status = 'ENABLED
   conversion settings, so label it `google_ads_conversions_metric`, never a cross-platform total.
 - Manager-account queries need `login-customer-id`; metrics for a client are read from the client ID.
 - Redact search terms and personal data before any artifact leaves the run directory.
+
+## Daily watcher queries (Adbot, added 2026-11-01)
+
+Used by `scripts/run_daily_watch.py` through `scripts/gaql_via_api.py` (read-only, `SearchStream`).
+
+| Query ID | Resource | Fields | Conditions |
+|---|---|---|---|
+| `campaign-daily-v1` | `campaign` | `segments.date`, `customer.id`, `customer.currency_code`, `campaign.id`, `campaign.name`, `campaign.status`, `campaign_budget.amount_micros`, `metrics.cost_micros`, `metrics.clicks`, `metrics.impressions`, `metrics.conversions` | `segments.date BETWEEN <14 days ago> AND <yesterday>` |
+| `ad-policy-v1` | `ad_group_ad` | `customer.id`, `campaign.id`, `ad_group_ad.status`, `ad_group_ad.policy_summary.approval_status` | `campaign.status = 'ENABLED'`, `ad_group.status = 'ENABLED'`, `ad_group_ad.status = 'ENABLED'` |
+
+Only ads that can be shown are read, so removed or paused ads cannot keep a traffic light red. Rows exist only for days with
+delivery; the watcher treats a missing day as zero delivery. Field existence of `approval_status` is recorded in CLM-0227
+(not yet observed on a real disapproved ad). A pull with no rows exits with code 3.

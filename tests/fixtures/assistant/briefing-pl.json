@@ -9,5 +9,6 @@
   "website": "https://example.invalid/przeglad",
   "language": "pl",
   "confirmed_by_user": true,
+  "confirmation_quote": "Tak, tak jest dobrze.",
   "confirmed_at": "2026-11-01T09:00:00Z"
 }

@@ -977,7 +977,8 @@
       "license": "Package registry metadata; citation only",
       "redistribution": "metadata-only",
       "claim_ids": [
-        "CLM-0223"
+        "CLM-0223",
+        "CLM-0227"
       ],
       "notes": "Release dates 32.0.0: 2026-09-09; 35.0.0: 2026-10-29."
     },
@@ -1026,6 +1027,39 @@
       "claim_ids": [
         "CLM-0225"
       ]
+    },
+    {
+      "id": "google-ads-cloud-project-official",
+      "title": "Google Ads API: Set up a Google API Console project (service account path)",
+      "locator": "https://developers.google.com/google-ads/api/docs/oauth/cloud-project",
+      "source_type": "official-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "confidence": "high",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0226"
+      ],
+      "notes": "Page last updated 2026-10-30 UTC."
+    },
+    {
+      "id": "google-ads-policy-summary-reference",
+      "title": "Google Ads API: PolicySummary (v26) and PolicyApprovalStatus",
+      "locator": "https://developers.google.com/google-ads/api/reference/rpc/v26/PolicySummary",
+      "source_type": "api-doc",
+      "authority_tier": 1,
+      "retrieved_at": "2026-11-01",
+      "refresh_due": "2026-12-01",
+      "version": "v26",
+      "confidence": "medium",
+      "license": "Google Developers content CC BY 4.0 and samples Apache-2.0 unless noted",
+      "redistribution": "metadata-only",
+      "claim_ids": [
+        "CLM-0227"
+      ],
+      "notes": "The reference page body could not be read through the fetch tool; the field was accepted by the live API and the enum members were read from google-ads 35.0.0."
     }
   ]
 }

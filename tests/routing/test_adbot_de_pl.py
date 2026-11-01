@@ -62,16 +62,18 @@ def test_skill_states_every_hard_stop_the_behavior_pack_depends_on(repo_root):
 
 @pytest.mark.parametrize("name", COMMANDS)
 def test_command_files_are_guided_safe_and_language_aware(repo_root, name):
-    path = repo_root / ".claude" / "commands" / f"{name}.md"
-    text = path.read_text(encoding="utf-8")
+    text = (repo_root / ".claude" / "commands" / f"{name}.md").read_text(encoding="utf-8")
     assert text.startswith("---\ndescription: ")
-    assert "settings" in text and "language" in text or name in {"trennen", "verbinden"}
+    assert "settings show" in text and "`language`" in text, f"{name}: no language rule"
     lowered = text.lower()
-    assert "nie" in lowered or "nicht" in lowered or "nichts" in lowered  # states a prohibition
-    if name not in {"verbinden", "trennen"}:
-        assert "prozesskarten.md" in text or "kadenz-und-regeln.md" in text or name in {"hilfe"}
-    # No secret-handling instruction may ask the user to share credentials.
-    assert "schicke" not in lowered or "nie" in lowered
+    # every command states at least one concrete prohibition of its own
+    assert re.search(r"(niemals|nie |nicht |nichts |keine |kein |ohne )", lowered), f"{name}: no stated prohibition"
+    if name not in {"verbinden", "trennen", "hilfe"}:
+        assert "prozesskarten.md" in text or "kadenz-und-regeln.md" in text, f"{name}: no process card"
+    if name == "hilfe":
+        assert "docs/<sprache>/00-overview.md" in text
+    # nothing may ask the user to hand over sign-in data
+    assert not re.search(r"(schick|sende|paste|wklej)\w* .*(passwort|schlüssel|client\.json)", lowered)
 
 
 def test_process_cards_cover_all_processes_in_both_languages(repo_root):

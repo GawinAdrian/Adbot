@@ -9,5 +9,6 @@
   "website": "https://example.invalid/wartung",
   "language": "de",
   "confirmed_by_user": true,
+  "confirmation_quote": "Ja, so passt es für mich.",
   "confirmed_at": "2026-11-01T09:00:00Z"
 }

@@ -40,7 +40,7 @@ def test_german_and_polish_define_identical_keys():
 def test_english_is_a_subset_and_extras_are_only_enum_labels():
     en, de = load_catalog("en"), load_catalog("de")
     assert set(en) <= set(de), sorted(set(en) - set(de))
-    assert all(key.startswith("enum.") for key in set(de) - set(en))
+    assert all(key.startswith("enum.") or key == "common.draft_notice" for key in set(de) - set(en))
 
 
 @pytest.mark.parametrize("language", SUPPORTED_LANGUAGES)
@@ -120,7 +120,7 @@ def test_label_translates_known_values_and_falls_back_to_legacy_title_case():
     ("language", "number", "percent", "money", "day"),
     [
         ("en", "1,234.50", "12.50%", "€1,234.50", "2026-11-01"),
-        ("de", "1.234,50", "12,50 %", "1.234,50 €", "01.11.2026"),
+        ("de", "1.234,50", "12,50\u00a0%", "1.234,50 €", "01.11.2026"),
         ("pl", "1 234,50", "12,50%", "1 234,50 zł", "01.11.2026"),
     ],
 )
@@ -235,7 +235,7 @@ def test_glossary_entries_are_complete_unique_and_marked_as_draft():
     ids = [term["id"] for term in terms]
     assert len(ids) == len(set(ids))
     for term in terms:
-        assert set(term) == {"id", "en", "de", "pl", "explain_de", "explain_pl"}
+        assert set(term) == {"id", "en", "de", "pl", "explain_de", "explain_pl", "explain_en"}
         assert all(isinstance(value, str) and value.strip() for value in term.values()), term["id"]
         assert re.fullmatch(r"[a-z][a-z0-9_]*", term["id"])
 
@@ -250,3 +250,22 @@ def test_glossary_terms_cover_the_labels_used_in_user_facing_text():
     terms = {term["id"] for term in _glossary()["terms"]}
     for needed in ("campaign", "ad_group", "keyword", "negative_keyword", "conversion", "daily_budget", "bid_strategy"):
         assert needed in terms
+
+
+def test_english_money_keeps_the_minus_sign_in_front():
+    assert Translator("en").money(-3, "PLN") == "-zł3.00"
+    assert Translator("en").money(-3, "EUR") == "-€3.00"
+    assert Translator("de").money(-3, "EUR") == "-3,00\u00a0€"
+
+
+def test_draft_notice_is_shown_for_unreviewed_languages_only():
+    assert Translator("en").draft_notice() is None
+    assert "Entwurf" in Translator("de").draft_notice()
+    assert "wersją roboczą" in Translator("pl").draft_notice()
+
+
+def test_every_glossary_term_is_explained_in_every_language():
+    for term in glossary()["terms"]:
+        explanations = [term["explain_de"], term["explain_pl"], term["explain_en"]]
+        assert all(text.strip() for text in explanations), term["id"]
+        assert len(set(explanations)) == 3, f"{term['id']}: an explanation is copied between languages"

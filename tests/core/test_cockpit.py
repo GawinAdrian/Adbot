@@ -39,6 +39,17 @@ def test_page_is_localized_complete_and_has_no_untranslated_markers(language):
     assert "[en]" not in page and "{" not in page.split("<style>")[0]
 
 
+def test_english_cockpit_explains_terms_in_english_and_german_in_german():
+    en, de = _page("en"), _page("de")
+    assert "Clicks divided by impressions, as a percentage." in en and "Klicks geteilt durch Impressionen" not in en
+    assert "Klicks geteilt durch Impressionen, in Prozent." in de
+
+
+def test_unreviewed_translation_is_marked_inside_the_page():
+    assert "wersją roboczą" in _page("pl") and "Entwurf" in _page("de")
+    assert "draft" not in _page("en").lower().split("<footer>")[1]
+
+
 def test_page_is_self_contained_without_scripts_or_network():
     page = _page("pl", recommendations=RECS)
     assert "<script" not in page.lower()
@@ -71,9 +82,8 @@ def test_traffic_light_is_text_not_only_color():
 
 def test_kpis_use_local_formats_and_glossary_explanations():
     page = _page("pl")
-    assert "zł" in page.replace("€", "zł") or "€" in page  # currency of the fixture is EUR, formatted the Polish way
+    assert "70,00\u00a0€" in page  # fixture currency is EUR, formatted the Polish way
     assert "Współczynnik klikalności (CTR)" in page
-    assert "Kliknięcie" not in page or True
     de = _page("de")
     assert "Klickrate (CTR)" in de and "Kosten" in de
 
@@ -91,7 +101,7 @@ def test_missing_inputs_and_gap_are_listed_as_notes():
     gap = build_cockpit({**_result(), "checks": _result()["checks"] + [
         {"rule": "data", "state": "gap", "status": "warning", "campaign_id": None, "campaign_name": None,
          "params": {"days": 5, "newest": "2026-10-28"}}]}, lang="de", created="2026-11-02")
-    assert "5 Tage alt" in gap
+    assert "Seit 5 Tagen keine frischen Daten" in gap
 
 
 @pytest.mark.parametrize(

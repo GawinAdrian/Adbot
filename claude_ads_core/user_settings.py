@@ -13,7 +13,7 @@ import json
 import os
 import stat
 import tempfile
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -71,6 +71,9 @@ def validate_settings(document: Any) -> dict[str, Any]:
         validate_workflow_contract("user-settings", document)
     except WorkflowContractError as exc:
         raise SettingsError(f"invalid settings: {exc}") from exc
+    attested = document["disk_encryption_attested_on"]
+    if attested is not None and date.fromisoformat(attested) > datetime.now(timezone.utc).date():
+        raise SettingsError("invalid settings: disk_encryption_attested_on must not be in the future")
     return document
 
 

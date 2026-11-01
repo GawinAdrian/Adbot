@@ -153,7 +153,7 @@ MESSAGES = {'report.title': 'Adbot – Auditbericht',
  'watch.ampel.red': 'Rot: bald handeln.',
  'watch.ampel.unknown': 'Grau: zu wenig Daten für eine Einschätzung.',
  'watch.data.normal': 'Die neuesten Daten sind vom {newest}.',
- 'watch.data.gap': 'Die neuesten Daten sind {days} Tage alt (vom {newest}).',
+ 'watch.data.gap': 'Seit {days} Tagen keine frischen Daten (neuester vollständiger Tag: {newest}).',
  'watch.data.gap.hint': 'Datenabruf erneut ausführen; prüfen, ob der Rechner an und angemeldet '
                         'war.',
  'watch.campaigns.none_enabled': 'In den Daten wurde keine aktive Kampagne gefunden.',
@@ -235,4 +235,17 @@ MESSAGES = {'report.title': 'Adbot – Auditbericht',
  'cockpit.footer': 'Diese Seite ist eine lokale Datei. Beim Öffnen werden keine Daten versendet.',
  'cockpit.change.before': 'Vorher',
  'cockpit.change.after': 'Nachher',
- 'cockpit.status.pending': 'offen'}
+ 'cockpit.status.pending': 'offen',
+ 'watch.data.empty': 'In den letzten {days} Tagen wurde keine Anzeige gezeigt und es gibt keine '
+                     'Daten.',
+ 'watch.data.empty.hint': 'Falls eine Kampagne laufen sollte, prüfe Status, Budget und Zahlung in '
+                          'Google Ads; ohne Kampagne ist das zu erwarten.',
+ 'watch.pacing.new': '{campaign}: zu neu, um die Ausgaben zu beurteilen (weniger als {days} Tage '
+                     'Daten).',
+ 'watch.pacing.new.hint': 'Warte ein paar Tage, bevor du die Ausgaben beurteilst.',
+ 'watch.conversions.thin': '{campaign}: Keine Conversions in den letzten {days} Tagen, aber auch '
+                           'davor nur {previous} in {days} Tagen; zu wenig, um von einem Einbruch '
+                           'zu sprechen.',
+ 'watch.conversions.thin.hint': 'Warte auf mehr Daten, bevor du etwas änderst.',
+ 'common.draft_notice': 'Hinweis: Diese Übersetzung ist ein Entwurf und noch nicht von einem '
+                        'Muttersprachler geprüft.'}

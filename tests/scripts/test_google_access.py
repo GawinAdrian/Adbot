@@ -234,3 +234,34 @@ def test_wrapper_reads_profile_env_file(tmp_path):
     (profile / "env").write_text("GOOGLE_PROJECT_ID=from-profile\n")
     result = _run_wrapper(tmp_path, {"ADBOT_PROFILE_DIR": str(profile)})
     assert result.returncode == 0, result.stderr
+
+
+def test_login_customer_id_comes_from_the_flag_then_the_environment():
+    assert adbot_env.resolve_login_customer_id("112-233-4455", {}) == "1122334455"
+    assert adbot_env.resolve_login_customer_id(None, {"GOOGLE_ADS_LOGIN_CUSTOMER_ID": "1122334455"}) == "1122334455"
+    assert adbot_env.resolve_login_customer_id("9999999999", {"GOOGLE_ADS_LOGIN_CUSTOMER_ID": "1122334455"}) == "9999999999"
+    assert adbot_env.resolve_login_customer_id(None, {}) is None
+    with pytest.raises(adbot_env.CredentialsError):
+        adbot_env.resolve_login_customer_id("12345", {})
+
+
+def test_gaql_script_exits_with_a_distinct_code_when_nothing_was_returned():
+    source = (SCRIPTS_DIR / "gaql_via_api.py").read_text(encoding="utf-8")
+    assert "return NO_ROWS_EXIT_CODE" in source
+    import run_daily_watch as job
+
+    assert job.NO_ROWS_EXIT_CODE == gaql_via_api.NO_ROWS_EXIT_CODE == 3
+
+
+def test_gaql_script_never_calls_anything_but_search_stream_on_the_google_ads_service():
+    """Structural read-only proof: parse the script and inspect every call, not just its text."""
+    import ast
+
+    tree = ast.parse((SCRIPTS_DIR / "gaql_via_api.py").read_text(encoding="utf-8"))
+    attribute_calls = {node.func.attr for node in ast.walk(tree) if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)}
+    assert "search_stream" in attribute_calls
+    assert not {name for name in attribute_calls if name.startswith(("mutate", "create", "update", "remove", "delete"))}
+    services = [node.args[0].value for node in ast.walk(tree)
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "get_service"
+                and node.args and isinstance(node.args[0], ast.Constant)]
+    assert services == ["GoogleAdsService"]

@@ -29,5 +29,5 @@ Analizę tygodniową uruchamiasz sam(a) poleceniem `/bericht`; strażnik działa
 
 ## Gdy coś nie działa
 
-- „Dane mają X dni”: komputer był wyłączony lub pobieranie się nie udało → instrukcja 08.
+- „Od X dni brak świeżych danych”: komputer był wyłączony lub pobieranie się nie udało → instrukcja 08.
 - Strona jest pusta: nie ma jeszcze przebiegu; instrukcja 08, sekcja „Jednorazowo ręcznie”.

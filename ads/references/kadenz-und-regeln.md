@@ -23,23 +23,28 @@ are not used because they cannot reach the local sign-in; `/loop` needs an open 
 | `PACING_WINDOW_DAYS` | 3 | recent days used for spend and delivery |
 | `PACING_CAPPED_RATIO` | 0.90 | spend at or above 90 % of the daily budget on every recent day: limited by budget |
 | `PACING_UNDER_RATIO` | 0.20 | spend at or below 20 % of the daily budget on every recent day: delivers very little |
-| `PACING_OVER_RATIO` | 1.50 | one day above 150 % of the daily budget: unusually high |
+| `PACING_OVER_RATIO` | 2.50 | one day above 250 % of the daily budget: unusually high (Adbot default; no platform limit is claimed) |
 | `CONVERSION_WINDOW_DAYS` | 7 | compare the last 7 days with the 7 days before |
 | `MIN_CLICKS_FOR_CONVERSION_RULES` | 30 | fewer clicks in the window: "not enough data", no alarm |
 | `MIN_CLICKS_FOR_NO_CONVERSION` | 50 | clicks needed before "no conversions at all" is reported |
+| `MIN_PREVIOUS_CONVERSIONS_FOR_DROP` | 3 | conversions needed in the week before a "drop" is reported; fewer is "too few to call it a drop" |
 | `DATA_GAP_DAYS` | 2 | data pulled more than this many days ago is a data gap |
 
 Rules, in plain words:
 
 1. **Budget used up / very low / unusually high** (warning). Says what happened, not what to change.
 2. **Delivery stopped** (critical): no impression for 3 days although there were impressions before.
-3. **Conversion drop** (critical): enough clicks, zero conversions, but conversions in the week before. Check tracking first.
+3. **Conversion drop** (critical): enough clicks, zero conversions, but at least 3 conversions in the week before. Check tracking first. With 1 or 2 conversions before, the answer is "too few to call it a drop".
 4. **No conversions** (warning): many clicks, zero now and zero before.
 5. **Rejected ads** (critical): needs the ad approval status; without it the check is "unknown" and listed as missing.
 6. **Small numbers never alarm**: under the click minimum the answer is "not enough data".
 7. Billing and payment status is **always listed as a missing input**; it is not readable with the supported access.
 
-The reference day is the last complete day before the data was pulled. A day without a row counts as zero delivery.
+The reference day is the last complete day before the data was pulled. A day without a row counts as zero delivery, **except** for days before a campaign's first row: a campaign with less than 3 days of data is "too new to judge".
+
+Delivery stopped compares the last 3 days with **every** earlier day in the pulled window, so a campaign that went quiet long ago is still reported. If a whole pull returns no rows (nothing was shown), the job records a yellow "no data" result instead of failing.
+
+**Data gap** is reported when the data is stale **or** when no successful run happened for more than 2 days (the watcher compares with the previous run's date).
 
 ## Optimisation rules (what the assistant may suggest)
 

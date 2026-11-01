@@ -90,6 +90,17 @@ def require_project(environ: Mapping[str, str]) -> str:
     return project
 
 
+def resolve_login_customer_id(flag: str | None, environ: Mapping[str, str]) -> str | None:
+    """Manager (MCC) ID from the flag, else ``GOOGLE_ADS_LOGIN_CUSTOMER_ID``; None for direct access."""
+    value = flag or environ.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID") or None
+    if value is None:
+        return None
+    digits = value.replace("-", "")
+    if not (len(digits) == 10 and digits.isdigit()):
+        raise CredentialsError("the manager (login) customer ID must be a 10-digit Google Ads customer ID")
+    return digits
+
+
 def build_client_config(
     environ: Mapping[str, str], login_customer_id: str | None = None
 ) -> dict[str, object]:

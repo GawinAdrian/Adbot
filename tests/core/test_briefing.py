@@ -56,6 +56,8 @@ def test_confirmed_briefing_is_valid_and_normalized(name, language, currency, bu
         lambda d: d.update(goal="   "),
         lambda d: d.update(confirmed_at="gestern"),
         lambda d: d.update(api_token="x"),
+        lambda d: d.update(confirmation_quote=""),
+        lambda d: d.pop("confirmation_quote"),
     ],
 )
 def test_unconfirmed_or_inconsistent_briefings_are_refused(mutate):
@@ -96,3 +98,17 @@ def test_draft_is_refused_for_an_unconfirmed_briefing():
     with pytest.raises(BriefingError, match="confirmed"):
         briefing_to_campaign(document, campaign_name="X", ad_group_name="Y",
                              keywords=(EditorKeyword("a", "Exact"),), ads=(_ad("https://example.invalid"),))
+
+
+def test_briefing_currency_must_match_the_account_currency_when_known():
+    document = _load("briefing-de.json")
+    assert validate_briefing(document, account_currency="EUR")["currency"] == "EUR"
+    with pytest.raises(BriefingError, match="differs from the account currency"):
+        validate_briefing(document, account_currency="PLN")
+    with pytest.raises(BriefingError, match="account currency"):
+        briefing_to_campaign(document, campaign_name="X", ad_group_name="Y", keywords=(EditorKeyword("a", "Exact"),),
+                             ads=(_ad("https://example.invalid"),), account_currency="PLN")
+
+
+def test_the_users_own_words_are_kept_in_the_normalized_briefing():
+    assert validate_briefing(_load("briefing-pl.json"))["confirmation_quote"] == "Tak, tak jest dobrze."

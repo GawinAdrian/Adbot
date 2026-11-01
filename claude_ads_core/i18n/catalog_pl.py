@@ -150,7 +150,7 @@ MESSAGES = {'report.title': 'Adbot – raport z audytu',
  'watch.ampel.red': 'Czerwony: trzeba wkrótce działać.',
  'watch.ampel.unknown': 'Szary: za mało danych, by ocenić.',
  'watch.data.normal': 'Najnowsze dane pochodzą z dnia {newest}.',
- 'watch.data.gap': 'Najnowsze dane mają {days} dni (z dnia {newest}).',
+ 'watch.data.gap': 'Od {days} dni brak świeżych danych (najnowszy pełny dzień: {newest}).',
  'watch.data.gap.hint': 'Uruchom pobieranie danych ponownie; sprawdź, czy komputer był włączony i '
                         'zalogowany.',
  'watch.campaigns.none_enabled': 'W danych nie znaleziono aktywnej kampanii.',
@@ -177,15 +177,15 @@ MESSAGES = {'report.title': 'Adbot – raport z audytu',
                                 'zostały odrzucone.',
  'watch.conversions.normal': '{campaign}: konwersje wyglądają normalnie przy otrzymanej liczbie '
                              'kliknięć.',
- 'watch.conversions.insufficient': '{campaign}: tylko {clicks} kliknięć w {days} dniach; za mało, '
-                                   'by ocenić konwersje (minimum {minimum}).',
+ 'watch.conversions.insufficient': '{campaign}: w ostatnich {days} dniach liczba kliknięć wynosi '
+                                   '{clicks}; to za mało, by ocenić konwersje (minimum {minimum}).',
  'watch.conversions.insufficient.hint': 'Poczekaj na więcej danych, zanim cokolwiek zmienisz.',
- 'watch.conversions.drop': '{campaign}: brak konwersji w ostatnich {days} dniach przy {clicks} '
-                           'kliknięciach, choć w {days} dniach wcześniej było ich {previous}.',
+ 'watch.conversions.drop': '{campaign}: brak konwersji w ostatnich {days} dniach (liczba kliknięć: '
+                           '{clicks}), choć w {days} dniach wcześniej było ich {previous}.',
  'watch.conversions.drop.hint': 'Najpierw sprawdź śledzenie konwersji (formularz, telefon, tag, '
                                 'zmiana strony), a dopiero potem oceniaj reklamy.',
- 'watch.conversions.none': '{campaign}: brak konwersji w {days} dniach przy {clicks} kliknięciach, '
-                           'a także w {days} dniach wcześniej.',
+ 'watch.conversions.none': '{campaign}: brak konwersji w {days} dniach (liczba kliknięć: {clicks}) '
+                           'i także w {days} dniach wcześniej.',
  'watch.conversions.none.hint': 'Sprawdź, czy śledzenie konwersji jest skonfigurowane i działa '
                                 'oraz czy strona docelowa pasuje do reklamy.',
  'watch.policy.normal': 'Nie zgłoszono odrzuconych reklam.',
@@ -230,4 +230,14 @@ MESSAGES = {'report.title': 'Adbot – raport z audytu',
  'cockpit.footer': 'Ta strona jest plikiem lokalnym. Jej otwarcie nie wysyła żadnych danych.',
  'cockpit.change.before': 'Przed',
  'cockpit.change.after': 'Po',
- 'cockpit.status.pending': 'oczekuje'}
+ 'cockpit.status.pending': 'oczekuje',
+ 'watch.data.empty': 'W ostatnich {days} dniach nie wyświetlono żadnej reklamy i nie ma danych.',
+ 'watch.data.empty.hint': 'Jeśli kampania powinna działać, sprawdź jej status, budżet i płatność w '
+                          'Google Ads; jeśli kampanii jeszcze nie ma, jest to oczekiwane.',
+ 'watch.pacing.new': '{campaign}: zbyt nowa, by ocenić wydatki (mniej niż {days} dni danych).',
+ 'watch.pacing.new.hint': 'Poczekaj kilka dni, zanim ocenisz wydatki.',
+ 'watch.conversions.thin': '{campaign}: brak konwersji w ostatnich {days} dniach, ale wcześniej '
+                           'też tylko {previous} w {days} dniach; za mało, by mówić o spadku.',
+ 'watch.conversions.thin.hint': 'Poczekaj na więcej danych, zanim cokolwiek zmienisz.',
+ 'common.draft_notice': 'Uwaga: to tłumaczenie jest wersją roboczą i nie zostało jeszcze '
+                        'sprawdzone przez osobę, dla której polski jest językiem ojczystym.'}
