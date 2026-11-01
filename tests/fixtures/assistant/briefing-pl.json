@@ -1,0 +1,13 @@
+{
+  "goal": "Więcej zapytań o przegląd pieca",
+  "goal_kind": "leads",
+  "daily_budget": "60",
+  "currency": "PLN",
+  "region": "Kraków i okolice 25 km",
+  "conversion_definition": "Wysłany formularz lub rozmowa telefoniczna powyżej 30 sekund",
+  "offer": "Przegląd pieca dla domów prywatnych",
+  "website": "https://example.invalid/przeglad",
+  "language": "pl",
+  "confirmed_by_user": true,
+  "confirmed_at": "2026-11-01T09:00:00Z"
+}

@@ -122,3 +122,27 @@ def test_cli_settings_init_show_and_overwrite_guard(tmp_path, capsys):
 def test_cli_settings_show_without_file_reports_clear_error(tmp_path, capsys):
     assert main(["settings", "show", "--profile-dir", str(tmp_path)]) == 2
     assert "not found" in capsys.readouterr().err
+
+
+def test_cli_settings_set_updates_selected_values_and_validates(tmp_path, capsys):
+    base = ["--profile-dir", str(tmp_path)]
+    assert main(["settings", "init", "--lang", "de", *base]) == 0
+    capsys.readouterr()
+    assert main(["settings", "set", *base, "--account", "123-456-7890", "--report", "monthly", "--weekday", "friday"]) == 0
+    capsys.readouterr()
+    main(["settings", "show", *base])
+    shown = json.loads(capsys.readouterr().out)
+    assert shown["active_account_ref"] == "1234567890"
+    assert shown["cadence"]["report"] == "monthly" and shown["cadence"]["report_weekday"] == "friday"
+    assert main(["settings", "set", *base, "--account", "none"]) == 0
+    capsys.readouterr()
+    main(["settings", "show", *base])
+    assert json.loads(capsys.readouterr().out)["active_account_ref"] is None
+
+
+def test_cli_settings_set_rejects_a_malformed_account_id(tmp_path, capsys):
+    base = ["--profile-dir", str(tmp_path)]
+    main(["settings", "init", "--lang", "pl", *base])
+    capsys.readouterr()
+    assert main(["settings", "set", *base, "--account", "12345"]) == 2
+    assert "invalid settings" in capsys.readouterr().err

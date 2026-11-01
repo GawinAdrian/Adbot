@@ -34,5 +34,13 @@ own currency and time zone are authoritative and must be read from the account, 
 
 ## Legal and policy notes
 
-Not yet researched (PRP step 6): imprint, privacy, advertising rules in Germany and Poland.
-Until sourced, the assistant gives no legal statements beyond "check with a qualified advisor".
+Status 2026-11-01: **not researched, no legal statements are made.** The assistant never says what the law
+requires. It may only list *topics to clarify with a qualified advisor*, as questions, without answers:
+
+- Which imprint, privacy, and consent information must the landing page show for this business and country?
+- Is a cookie or tracking consent needed before conversion measurement runs on the site?
+- Is the offer in a regulated category with special advertising rules (health, finance, legal, housing, employment)?
+- If the account belongs to someone else, is a data-processing agreement needed before account data reaches Google or Claude?
+
+Add rules here only with an official source (law text, regulator, or Google policy page), retrieval date, and a
+ledger claim (`control-plane/manifests/claim-ledger.json`).
