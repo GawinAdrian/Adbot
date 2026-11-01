@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-marketing-hub:claude-ads:schema:core:v1:tenant-profile.schema.json",
+  "title": "TenantProfile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "tenant_id", "created_at", "updated_at", "display_name", "relationship", "status", "business", "objective", "accounts", "kpis", "ceilings", "approvers", "reporting", "brand_profile_ref", "assumptions", "privacy_class", "data_lifecycle"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"}, "artifact_type": {"const": "tenant-profile"},
+    "tenant_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"},
+    "created_at": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/datetime"},
+    "updated_at": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/datetime"},
+    "display_name": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"},
+    "relationship": {"enum": ["own", "managed-client", "prospect"]},
+    "status": {"enum": ["active", "paused", "offboarded"]},
+    "business": {"type": "object", "additionalProperties": false, "required": ["name", "business_model", "geographies", "regulated_categories", "website"], "properties": {"name": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "business_model": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "geographies": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/string_array"}, "regulated_categories": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/string_array"}, "website": {"type": ["string", "null"], "pattern": "^https://"}}},
+    "objective": {"type": "object", "additionalProperties": false, "required": ["primary", "conversion_definition", "success_metrics"], "properties": {"primary": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "conversion_definition": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "success_metrics": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/string_array"}}},
+    "accounts": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["platform", "account_id", "role", "login_customer_id", "connection"], "properties": {"platform": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/platform"}, "account_id": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "role": {"enum": ["manager", "client", "own"]}, "login_customer_id": {"type": ["string", "null"]}, "connection": {"enum": ["none", "export", "live-read", "live-read-verified"]}}}},
+    "kpis": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["metric", "target", "unit", "direction"], "properties": {"metric": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "target": {"type": "number", "minimum": 0}, "unit": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "direction": {"enum": ["max", "min"]}}}},
+    "ceilings": {"type": "object", "additionalProperties": false, "required": ["currency", "max_budget_change_pct", "max_budget_change_abs", "max_objects_per_approval", "forbidden_operations"], "properties": {"currency": {"type": "string", "pattern": "^[A-Z]{3}$"}, "max_budget_change_pct": {"type": "number", "minimum": 0}, "max_budget_change_abs": {"type": "number", "minimum": 0}, "max_objects_per_approval": {"type": "integer", "minimum": 1}, "forbidden_operations": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/string_array"}}},
+    "approvers": {"type": "object", "additionalProperties": false, "required": ["primary", "secondary"], "properties": {"primary": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, "secondary": {"type": ["string", "null"]}}},
+    "reporting": {"type": "object", "additionalProperties": false, "required": ["cadence", "audience", "language"], "properties": {"cadence": {"enum": ["weekly", "biweekly", "monthly", "on-demand"]}, "audience": {"enum": ["internal", "client"]}, "language": {"type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$"}}},
+    "brand_profile_ref": {"type": ["string", "null"]},
+    "assumptions": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/string_array"},
+    "privacy_class": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/privacy"},
+    "data_lifecycle": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:data-lifecycle.schema.json"}
+  }
+}

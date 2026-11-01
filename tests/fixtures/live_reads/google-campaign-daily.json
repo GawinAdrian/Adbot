@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "platform": "google",
+  "customer_id": "1234567890",
+  "login_customer_id": "1122334455",
+  "api_version": "v21",
+  "query_id": "campaign-daily-v1",
+  "query": "SELECT segments.date, customer.id, customer.descriptive_name, customer.currency_code, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign_budget.amount_micros, metrics.cost_micros, metrics.conversions FROM campaign WHERE segments.date BETWEEN '2026-08-01' AND '2026-08-02' AND campaign.status IN ('ENABLED','PAUSED')",
+  "retrieved_at": "2026-08-27T09:15:00+00:00",
+  "rows": [
+    {
+      "segments": {"date": "2026-08-01"},
+      "customer": {"id": "1234567890", "descriptiveName": "Sanitized Live Demo", "currencyCode": "EUR"},
+      "campaign": {"id": "222000111", "name": "Sanitized PMax Campaign", "status": "ENABLED", "advertisingChannelType": "PERFORMANCE_MAX"},
+      "campaignBudget": {"amountMicros": "30000000"},
+      "metrics": {"costMicros": "28750000", "conversions": 1.5}
+    },
+    {
+      "segments.date": "2026-08-02",
+      "customer.id": "1234567890",
+      "customer.descriptive_name": "Sanitized Live Demo",
+      "customer.currency_code": "EUR",
+      "campaign.id": "222000111",
+      "campaign.name": "Sanitized PMax Campaign",
+      "campaign.status": "ENABLED",
+      "campaign.advertising_channel_type": "PERFORMANCE_MAX",
+      "campaign_budget.amount_micros": "30000000",
+      "metrics.cost_micros": "31250000",
+      "metrics.conversions": "2"
+    }
+  ]
+}

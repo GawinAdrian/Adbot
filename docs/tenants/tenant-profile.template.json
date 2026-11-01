@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_type": "tenant-profile",
+  "tenant_id": "beispiel-kunde",
+  "created_at": "2026-08-27T12:00:00Z",
+  "updated_at": "2026-08-27T12:00:00Z",
+  "display_name": "Beispiel Kunde GmbH",
+  "relationship": "managed-client",
+  "status": "active",
+  "business": {
+    "name": "Beispiel Kunde GmbH",
+    "business_model": "Lokale Dienstleistung, Lead-Generierung",
+    "geographies": ["DE"],
+    "regulated_categories": [],
+    "website": "https://example.com"
+  },
+  "objective": {
+    "primary": "Qualifizierte Anfragen",
+    "conversion_definition": "Formular-Lead oder Anruf > 60 s (Google Ads Conversion-Aktion)",
+    "success_metrics": ["cpa", "leads_per_week"]
+  },
+  "accounts": [
+    {"platform": "google", "account_id": "1234567890", "role": "client", "login_customer_id": "1122334455", "connection": "none"}
+  ],
+  "kpis": [
+    {"metric": "cpa", "target": 40, "unit": "EUR", "direction": "min"},
+    {"metric": "leads_per_week", "target": 10, "unit": "count", "direction": "max"}
+  ],
+  "ceilings": {
+    "currency": "EUR",
+    "max_budget_change_pct": 20,
+    "max_budget_change_abs": 20,
+    "max_objects_per_approval": 5,
+    "forbidden_operations": ["delete", "remove_conversion_action", "change_billing"]
+  },
+  "approvers": {"primary": "operator", "secondary": null},
+  "reporting": {"cadence": "weekly", "audience": "client", "language": "de"},
+  "brand_profile_ref": null,
+  "assumptions": ["KPI-Ziele vom Operator zu bestätigen"],
+  "privacy_class": "confidential",
+  "data_lifecycle": {
+    "schema_version": "1.0.0",
+    "lifecycle_id": "beispiel-kunde-lifecycle",
+    "classification": "confidential",
+    "retention": {
+      "minimum_seconds": 0,
+      "mode": "operator-defined",
+      "delete_after": "2027-08-27T12:00:00Z",
+      "purpose": "Betreuung der Werbekonten des Mandanten",
+      "exception_reason": null
+    },
+    "encryption": {
+      "at_rest": "verified",
+      "in_transit": "verified",
+      "evidence_refs": ["operator-attestation:filevault-enabled", "transport:https-only"]
+    },
+    "access": {
+      "owner": "operator",
+      "authorized_roles": ["operator"],
+      "access_log_locator": "tenants/beispiel-kunde/access-log.json"
+    },
+    "deletion": {
+      "status": "scheduled",
+      "method": "Secure deletion of the tenant directory after offboarding",
+      "verification_required": true,
+      "verification_artifact_locator": null
+    },
+    "incident": {
+      "owner": "operator",
+      "reporting_channel": "Private channel of the operator",
+      "status": "not-triggered",
+      "record_locator": null
+    }
+  }
+}

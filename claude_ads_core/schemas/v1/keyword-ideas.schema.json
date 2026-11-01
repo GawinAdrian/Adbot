@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:ai-marketing-hub:claude-ads:schema:core:v1:keyword-ideas.schema.json", "title": "KeywordIdeas v1", "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "run_id", "created_at", "platform", "customer_id", "login_customer_id", "api_version", "query_id", "seed", "geo_target_constants", "language", "keyword_plan_network", "retrieved_at", "ideas"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"}, "artifact_type": {"const": "keyword-ideas"}, "run_id": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/id"}, "created_at": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/datetime"},
+    "platform": {"const": "google"},
+    "customer_id": {"type": "string", "pattern": "^[0-9]{10}$"},
+    "login_customer_id": {"anyOf": [{"type": "string", "pattern": "^[0-9]{10}$"}, {"type": "null"}]},
+    "api_version": {"type": "string", "pattern": "^v[0-9]{1,3}$"},
+    "query_id": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/id"},
+    "seed": {"type": "object", "additionalProperties": false, "required": ["keywords", "url"], "properties": {"keywords": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/string_array"}, "url": {"anyOf": [{"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"}, {"type": "null"}]}}, "anyOf": [{"properties": {"keywords": {"minItems": 1}}}, {"properties": {"url": {"type": "string", "minLength": 1}}}]},
+    "geo_target_constants": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^geoTargetConstants/[0-9]+$"}},
+    "language": {"type": "string", "pattern": "^languageConstants/[0-9]+$"},
+    "keyword_plan_network": {"enum": ["GOOGLE_SEARCH", "GOOGLE_SEARCH_AND_PARTNERS"]},
+    "retrieved_at": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/datetime"},
+    "ideas": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["text", "avg_monthly_searches", "competition", "competition_index", "low_top_of_page_bid_micros", "high_top_of_page_bid_micros", "close_variants"], "properties": {
+      "text": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/nonempty"},
+      "avg_monthly_searches": {"type": ["integer", "null"], "minimum": 0},
+      "competition": {"enum": ["UNSPECIFIED", "UNKNOWN", "LOW", "MEDIUM", "HIGH"]},
+      "competition_index": {"type": ["integer", "null"], "minimum": 0, "maximum": 100},
+      "low_top_of_page_bid_micros": {"type": ["integer", "null"], "minimum": 0},
+      "high_top_of_page_bid_micros": {"type": ["integer", "null"], "minimum": 0},
+      "close_variants": {"$ref": "urn:ai-marketing-hub:claude-ads:schema:core:v1:workflow-common.schema.json#/$defs/string_array"}
+    }}}
+  }
+}
