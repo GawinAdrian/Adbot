@@ -9,7 +9,7 @@
 | Co | Po co | Sprawdzenie |
 |---|---|---|
 | **Dostęp do Claude** (własne konto/abonament lub klucz API) | praca AI odbywa się w Claude Code | koszty i plan ustala Anthropic; sprawdź wcześniej na stronie Anthropic |
-| **Claude Code** (terminal lub karta „Code” w aplikacji Claude Desktop, Mac i Windows) | wykonuje `/start`, `/analyse` itd. | wymagania planu dla aplikacji Desktop sprawdź w dokumentacji Anthropic |
+| **Claude Code** (terminal lub karta „Code” w aplikacji Claude Desktop, Mac i Windows) | wykonuje `/zacznij`, `/analiza` itd. | wymagania planu dla aplikacji Desktop sprawdź w dokumentacji Anthropic |
 | **Python 3.11 lub nowszy** | wykonuje analizę | `python3 --version` (Windows: `py --version`) |
 | **uv** | w razie potrzeby pobiera bibliotekę Google | `uv --version` |
 | **Narzędzie wiersza poleceń Google Cloud (`gcloud`)** | logowanie do Google | `gcloud --version` |
@@ -28,7 +28,7 @@ Windows: `winget install astral-sh.uv`). **Nie wykonuj instrukcji, które wymaga
    Potem polecenie wszędzie brzmi `python`. Adbot nie potrzebuje dodatkowych pakietów Pythona.
 3. Sprawdź: `python -m claude_ads_core --version` pokazuje numer wersji.
 4. Uruchom Claude Code w folderze Adbota (terminal: `claude`; aplikacja Desktop: wybierz folder jako projekt).
-5. Wpisz `/start`. Polecenia pojawiają się po wpisaniu `/`.
+5. Wpisz `/zacznij`. Polecenia pojawiają się po wpisaniu `/`.
 
 ## Sprawdź
 

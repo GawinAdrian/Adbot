@@ -11,14 +11,14 @@ analizuje je i przygotowuje propozycje.
 
 | Chcesz … | Polecenie | Instrukcja |
 |---|---|---|
-| wszystko skonfigurować | `/start` | 01, 02 |
-| połączyć / odłączyć konto Google | `/verbinden`, `/trennen` | 02, 03 |
-| sprawdzić, jak stoją reklamy | `/analyse` | 04 |
-| przygotować pierwszą kampanię | `/kampagne` | 05 |
-| zobaczyć raport tygodniowy i przegląd | `/bericht` | 06 |
-| dostać propozycje usprawnień | `/optimieren` | 07 |
+| wszystko skonfigurować | `/zacznij` | 01, 02 |
+| połączyć / odłączyć konto Google | `/polacz`, `/odlacz` | 02, 03 |
+| sprawdzić, jak stoją reklamy | `/analiza` | 04 |
+| przygotować pierwszą kampanię | `/kampania` | 05 |
+| zobaczyć raport tygodniowy i przegląd | `/raport` | 06 |
+| dostać propozycje usprawnień | `/optymalizuj` | 07 |
 | uruchomić codzienną kontrolę automatycznie | – | 08 |
-| zajrzeć, gdy coś nie działa | `/hilfe` | 09, 10 |
+| zajrzeć, gdy coś nie działa | `/pomoc` | 09, 10 |
 
 (Nazwy poleceń są niemieckie, ale rozmowa toczy się w języku z Twoich ustawień.)
 
@@ -37,5 +37,5 @@ analizuje je i przygotowuje propozycje.
 
 ## Jak to współpracuje
 
-**Liczby** pochodzą ze skryptu (codziennie, bez AI, bez kosztów). **Interpretacja i propozycje** pochodzą z AI, gdy uruchomisz `/bericht` lub `/analyse`.
+**Liczby** pochodzą ze skryptu (codziennie, bez AI, bez kosztów). **Interpretacja i propozycje** pochodzą z AI, gdy uruchomisz `/raport` lub `/analiza`.
 Wszystko trafia jako pliki do folderu `.adbot/` na Twoim komputerze.

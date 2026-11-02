@@ -4,7 +4,7 @@
 
 **Stan na:** 2026-11-01
 
-**Polecenie:** `/optimieren` · **Wynik:** `optimisation-draft.md` · W tej wersji zmiany wprowadzasz **Ty**
+**Polecenie:** `/optymalizuj` · **Wynik:** `optimisation-draft.md` · W tej wersji zmiany wprowadzasz **Ty**
 
 ## Jak wygląda propozycja
 

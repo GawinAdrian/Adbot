@@ -4,7 +4,7 @@
 
 **Stan na:** 2026-11-01
 
-**Polecenie:** `/kampagne` · **Wynik:** szkic CSV, **wszystko wstrzymane** · **Publikujesz tylko Ty**
+**Polecenie:** `/kampania` · **Wynik:** szkic CSV, **wszystko wstrzymane** · **Publikujesz tylko Ty**
 
 ## 1. Brief (każdą informację potwierdzasz Ty)
 

@@ -4,7 +4,7 @@
 
 **Stan na:** 2026-11-01
 
-**Polecenie:** `/analyse` · **Wynik:** plik w folderze `.adbot/runs/…` · **Niczego nie zmienia** na Twoim koncie
+**Polecenie:** `/analiza` · **Wynik:** plik w folderze `.adbot/runs/…` · **Niczego nie zmienia** na Twoim koncie
 
 ## Przypadek A: masz już kampanie
 

@@ -12,4 +12,6 @@ Zeige in der Sprache der Nutzerin diese Liste mit je einem Satz und verweise auf
 
 `/start` Einrichtung · `/verbinden` Google-Konto verbinden · `/trennen` Verbindung lösen · `/analyse` Ist-Stand · `/kampagne` erste Kampagne als Entwurf · `/bericht` Wochenbericht und Cockpit · `/optimieren` Verbesserungsvorschläge · `/hilfe` diese Übersicht.
 
+Die polnischen Entsprechungen: `/zacznij`, `/polacz`, `/odlacz`, `/analiza`, `/kampania`, `/raport`, `/optymalizuj`, `/pomoc`.
+
 Erinnere an die drei Regeln: Zugangsdaten gibt die Nutzerin selbst ein; nichts am Konto ohne ihre ausdrückliche Zustimmung; nichts wird gelöscht.
