@@ -82,3 +82,28 @@ def test_process_cards_cover_all_processes_in_both_languages(repo_root):
         assert heading in text
     assert "DE:" in text and "PL:" in text
     assert re.search(r"[ąęłńóśźż]", text) and re.search(r"[äöüß]", text)
+
+
+PL_COMMANDS = {
+    "zacznij": "start", "polacz": "verbinden", "odlacz": "trennen", "analiza": "analyse",
+    "kampania": "kampagne", "raport": "bericht", "optymalizuj": "optimieren", "pomoc": "hilfe",
+}
+
+
+@pytest.mark.parametrize("pl_name,de_name", sorted(PL_COMMANDS.items()))
+def test_polish_commands_mirror_the_german_ones(repo_root, pl_name, de_name):
+    commands = repo_root / ".claude" / "commands"
+    pl = (commands / f"{pl_name}.md").read_text(encoding="utf-8")
+    de = (commands / f"{de_name}.md").read_text(encoding="utf-8")
+    assert pl.startswith("---\ndescription: ") and re.search(r"[ąćęłńóśźż]", pl)
+    assert "settings show" in pl and "`language`" in pl
+    assert re.search(r"(nigdy|nie |niczego|żadn|bez )", pl.lower()), f"{pl_name}: no stated prohibition"
+    # same process card / document references as the German command
+    for ref in re.findall(r"`((?:ads|docs|scripts)/[^`<> ]+)`", de):
+        if ref.startswith("docs/de/"):
+            ref = ref.replace("docs/de/", "docs/pl/")
+        if ref.startswith("docs/<sprache>/"):
+            ref = ref.replace("<sprache>", "pl")
+        assert ref in pl or ref.replace("docs/pl/", "docs/de/") in pl, f"{pl_name}: missing {ref}"
+    assert ("argument-hint" in de) == ("argument-hint" in pl)
+    assert not re.search(r"(wyślij|wyslij|wklej)\w* .*(hasł|klucz|client\.json)", pl.lower())

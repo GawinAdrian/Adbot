@@ -84,7 +84,7 @@ python -m claude_ads_core settings init --lang pl
 ```
 
 Zastąp `TWOJ-IDENTYFIKATOR-PROJEKTU` identyfikatorem z kroku 1. (Windows: utwórz folder `%USERPROFILE%\.config\adbot\standard`, a w nim plik `env` w edytorze tekstu.)
-Konto wybierzesz potem w poleceniu `/start`.
+Konto wybierzesz potem w poleceniu `/zacznij`.
 
 ## Krok 7 · Sprawdź
 

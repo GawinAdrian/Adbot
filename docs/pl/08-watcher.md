@@ -9,7 +9,7 @@
 
 ## Wymagania
 
-Konto jest połączone (`doctor` pokazuje „połączone”) i wybrano aktywne konto (`/start` lub `python -m claude_ads_core settings set --account 1234567890`).
+Konto jest połączone (`doctor` pokazuje „połączone”) i wybrano aktywne konto (`/zacznij` lub `python -m claude_ads_core settings set --account 1234567890`).
 
 ## Jednorazowo ręcznie
 

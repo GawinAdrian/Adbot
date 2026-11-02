@@ -14,6 +14,8 @@ EXPECTED = ["00-overview", "01-install", "02-connect", "03-disconnect", "04-anal
             "06-cockpit-report", "07-approvals-undo", "08-watcher", "09-troubleshooting", "10-glossary-privacy"]
 ASCII_SUBSTITUTES = ("Aenderung", "fuer ", "moechte", "muessen", "waehrend", "Schluessel", "naechst", "ueber", "loeschen",
                      "koennen", "zurueck", "Pruefung", "Loesch", "Massnahme", "Gueltig")
+PL_TO_DE_COMMAND = {"/zacznij": "/start", "/polacz": "/verbinden", "/odlacz": "/trennen", "/analiza": "/analyse",
+                    "/kampania": "/kampagne", "/raport": "/bericht", "/optymalizuj": "/optimieren", "/pomoc": "/hilfe"}
 BACKTICK = re.compile(r"`([^`\n]+)`")
 PATH_ROOTS = ("docs/", "ads/", "scripts/", "claude_ads_core/", "skills/", "control-plane/")
 
@@ -34,7 +36,7 @@ def test_structure_matches_between_languages(name):
     assert de.count("```") == pl.count("```"), f"{name}: code blocks differ"
     # the commands a guide shows must be identical in both languages
     de_cmds = [c for c in BACKTICK.findall(de) if c.startswith(("python ", "gcloud ", "/"))]
-    pl_cmds = [c for c in BACKTICK.findall(pl) if c.startswith(("python ", "gcloud ", "/"))]
+    pl_cmds = [PL_TO_DE_COMMAND.get(c, c) for c in BACKTICK.findall(pl) if c.startswith(("python ", "gcloud ", "/"))]
     normalise = lambda items: sorted(re.sub(r"<[^>]+>", "<X>", re.sub(r"--lang (de|pl)", "--lang X", c)) for c in items)
     assert normalise(de_cmds) == normalise(pl_cmds), name
 
@@ -59,6 +61,8 @@ def test_referenced_paths_and_slash_commands_exist(language, name):
     for token in BACKTICK.findall(text):
         if token.startswith(PATH_ROOTS) and " " not in token and "<" not in token and "*" not in token:
             assert (ROOT / token.rstrip("/")).exists(), f"{language}/{name}: missing {token}"
+        if language == "pl":
+            assert token not in PL_TO_DE_COMMAND.values(), f"{language}/{name}: German command {token} in Polish guide"
         match = re.fullmatch(r"/([a-z]+)", token)
         if match:
             assert (ROOT / ".claude" / "commands" / f"{match.group(1)}.md").is_file(), f"{language}/{name}: no command {token}"

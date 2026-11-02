@@ -1,5 +1,7 @@
 # Adbot
 
+**Deutsch** · [Polski](README.pl.md)
+
 **DE:** Google-Werbung für kleine Unternehmen – analysieren, planen, als pausierten Entwurf vorbereiten und überwachen.
 Auf **Deutsch und Polnisch**, mit Anleitungen Schritt für Schritt.
 **PL:** Reklama w Google dla małych firm – analiza, planowanie, wstrzymany szkic kampanii i monitorowanie.
@@ -36,6 +38,7 @@ claude                                                  # im Adbot-Ordner; dann 
 ```
 
 Befehle in Claude Code: `/start` · `/verbinden` · `/trennen` · `/analyse` · `/kampagne` · `/bericht` · `/optimieren` · `/hilfe`.
+Polecenia po polsku (Entwurf): `/zacznij` · `/polacz` · `/odlacz` · `/analiza` · `/kampania` · `/raport` · `/optymalizuj` · `/pomoc`.
 
 ### Der geerbte Orchestrator
 

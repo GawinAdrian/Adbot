@@ -4,11 +4,11 @@
 
 **Stan na:** 2026-11-01
 
-**Polecenie:** `/bericht` · **Wynik:** `cockpit.html` i raport tygodniowy · **Niczego nie zmienia** na Twoim koncie
+**Polecenie:** `/raport` · **Wynik:** `cockpit.html` i raport tygodniowy · **Niczego nie zmienia** na Twoim koncie
 
 ## Otwieranie kokpitu
 
-`/bericht` buduje przegląd i podaje ścieżkę pliku `cockpit.html` (w folderze ostatniego przebiegu w `.adbot/runs/`).
+`/raport` buduje przegląd i podaje ścieżkę pliku `cockpit.html` (w folderze ostatniego przebiegu w `.adbot/runs/`).
 Dwukrotne kliknięcie otwiera plik w przeglądarce. Strona to **plik lokalny**: przy otwarciu nie są wysyłane żadne dane.
 
 Samodzielnie: `python -m claude_ads_core cockpit build --watch-result .adbot/runs/<przebieg>/watch-result.json`
@@ -25,7 +25,7 @@ Samodzielnie: `python -m claude_ads_core cockpit build --watch-result .adbot/run
 ## Rytm tygodniowy
 
 Domyślnie: **poniedziałek**. Zmiana: `python -m claude_ads_core settings set --weekday friday` (lub `--report monthly`).
-Analizę tygodniową uruchamiasz sam(a) poleceniem `/bericht`; strażnik działa codziennie sam (instrukcja 08).
+Analizę tygodniową uruchamiasz sam(a) poleceniem `/raport`; strażnik działa codziennie sam (instrukcja 08).
 
 ## Gdy coś nie działa
 

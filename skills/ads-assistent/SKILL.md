@@ -30,13 +30,13 @@ Each process has a fixed card in `ads/references/prozesskarten.md` (inputs, step
 
 | Request | Command | Card |
 |---|---|---|
-| First setup | `/start` | Start |
-| Connect or disconnect the Google account | `/verbinden`, `/trennen` | Connect / Disconnect |
-| "How are my ads doing?", analyse | `/analyse` | Analyse (case A: account has history; case B: no campaigns yet) |
-| First campaign | `/kampagne` | Campaign |
-| Weekly report, monitoring | `/bericht` | Report |
-| Improvement suggestions | `/optimieren` | Optimise |
-| Help, what can I do | `/hilfe` | Help |
+| First setup | `/start` (PL: `/zacznij`) | Start |
+| Connect or disconnect the Google account | `/verbinden`, `/trennen` (PL: `/polacz`, `/odlacz`) | Connect / Disconnect |
+| "How are my ads doing?", analyse | `/analyse` (PL: `/analiza`) | Analyse (case A: account has history; case B: no campaigns yet) |
+| First campaign | `/kampagne` (PL: `/kampania`) | Campaign |
+| Weekly report, monitoring | `/bericht` (PL: `/raport`) | Report |
+| Improvement suggestions | `/optimieren` (PL: `/optymalizuj`) | Optimise |
+| Help, what can I do | `/hilfe` (PL: `/pomoc`) | Help |
 
 ## Campaign briefing gate
 

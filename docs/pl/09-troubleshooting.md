@@ -12,7 +12,7 @@ Najpierw zawsze: `python -m claude_ads_core doctor --lang pl --online`
 |---|---|---|
 | Python … jest zbyt stary | wersja poniżej 3.11 | zainstaluj nowszą (instrukcja 01) |
 | Brakuje narzędzia uv / narzędzia Google Cloud | uwaga, nie krytyczne | zainstaluj, gdy chcesz bezpośrednio pobierać dane lub łączyć konto |
-| Nie znaleziono prawidłowych ustawień | `/start` jeszcze nie był uruchomiony | `/start` lub `python -m claude_ads_core settings init --lang pl` |
+| Nie znaleziono prawidłowych ustawień | `/zacznij` jeszcze nie był uruchomiony | `/zacznij` lub `python -m claude_ads_core settings init --lang pl` |
 | Identyfikator projektu nie jest ustawiony | brak pliku `env` w profilu | instrukcja 02, krok 6 |
 | Nie znaleziono logowania Google | konto nie jest połączone | instrukcja 02, krok 5 |
 | Plik logowania nieczytelny/niekompletny | uszkodzony | odłącz (03), potem połącz ponownie (02) |
@@ -34,7 +34,7 @@ Najpierw zawsze: `python -m claude_ads_core doctor --lang pl --online`
 
 **Czy Adbot może sam opublikować kampanię?** Nie, nie w tej wersji. Importujesz szkic i publikujesz sam(a) (instrukcja 05).
 
-**Jak często Adbot zagląda na konto?** Codziennie strażnik (bez AI), co tydzień interpretacja (gdy uruchomisz `/bericht`), co miesiąc analiza pogłębiona. Szczegóły: `ads/references/kadenz-und-regeln.md`.
+**Jak często Adbot zagląda na konto?** Codziennie strażnik (bez AI), co tydzień interpretacja (gdy uruchomisz `/raport`), co miesiąc analiza pogłębiona. Szczegóły: `ads/references/kadenz-und-regeln.md`.
 
 **Dlaczego Adbot czasem nic nie zaleca?** Przy małej liczbie kliknięć liczby to przypadek. „Poczekać” jest wtedy uczciwą odpowiedzią.
 
