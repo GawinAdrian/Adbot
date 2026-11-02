@@ -10,7 +10,7 @@ Po **niemiecku i po polsku**, z instrukcjami krok po kroku.
 Adbot arbeitet mit [Claude Code](https://claude.com/claude-code) und liest dein **eigenes** Google-Ads-Konto nur lesend.
 Es ändert nichts an deinem Konto, löscht nichts und veröffentlicht keine Kampagne – das machst du selbst.
 
-> **Status:** frühe Version, privat. Polnische Texte sind **Entwurf** und warten auf die Prüfung durch einen Muttersprachler.
+> **Status:** frühe Version. Polnische Texte sind **Entwurf** und warten auf die Prüfung durch einen Muttersprachler.
 > Das Projekt erhebt keinen Release-Anspruch (siehe `control-plane/RELEASE_REQUIREMENTS.md`).
 
 ## Loslegen / Zacznij tutaj

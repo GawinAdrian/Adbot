@@ -59,7 +59,7 @@ def test_rows_follow_editor_column_contract_and_stay_paused():
 
 
 def test_rendered_csv_matches_golden_fixture():
-    assert render_editor_csv([_draft()]) == GOLDEN.read_text(encoding="utf-8", newline="")
+    assert render_editor_csv([_draft()]) == GOLDEN.read_bytes().decode("utf-8")
 
 
 def test_write_adds_bom_and_refuses_overwrite(tmp_path: Path):

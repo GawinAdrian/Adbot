@@ -8,7 +8,7 @@ Po **polsku i po niemiecku**, z instrukcjami krok po kroku.
 Adbot działa z [Claude Code](https://claude.com/claude-code) i odczytuje **Twoje własne** konto Google Ads wyłącznie w trybie do odczytu.
 Niczego na Twoim koncie nie zmienia, niczego nie usuwa i nie publikuje żadnej kampanii – to robisz Ty sam(a).
 
-> **Status:** wczesna wersja, prywatna. Polskie teksty to **wersja robocza** i czekają na sprawdzenie przez native speakera.
+> **Status:** wczesna wersja. Polskie teksty to **wersja robocza** i czekają na sprawdzenie przez native speakera.
 > Projekt nie zgłasza gotowości do wydania (zob. `control-plane/RELEASE_REQUIREMENTS.md`).
 
 ## Zacznij tutaj
